@@ -1,0 +1,52 @@
+{
+  "name": "fuckyou.eth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack -w",
+    "watch-server": "webpack-dev-server --color --hot",
+    "update-constants": "node scripts/update_constants.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "babel-polyfill": "^6.23.0",
+    "blockies": "github:tomusdrw/blockies",
+    "bulma": "^0.4.1",
+    "convert-hex": "^0.1.0",
+    "es6-promisify": "^5.0.0",
+    "font-awesome": "^4.7.0",
+    "history": "^4.6.1",
+    "moment": "^2.18.1",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-notification-system": "^0.2.14",
+    "react-notification-system-redux": "^1.1.2",
+    "react-redux": "^5.0.4",
+    "react-router-dom": "^4.1.1",
+    "react-router-redux": "^5.0.0-alpha.6",
+    "redux": "^3.6.0",
+    "redux-saga": "^0.15.3",
+    "text-encoding": "^0.6.4",
+    "truffle": "^3.2.2",
+    "web3": "^0.19.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-latest": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "css-loader": "^0.28.1",
+    "json-loader": "^0.5.4",
+    "jsonfile": "^3.0.0",
+    "node-sass": "^4.5.2",
+    "sass-loader": "^6.0.3",
+    "style-loader": "^0.17.0",
+    "webpack": "^2.5.1",
+    "webpack-dev-server": "^2.4.5"
+  }
+}
