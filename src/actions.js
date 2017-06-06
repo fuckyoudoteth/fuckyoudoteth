@@ -2,6 +2,7 @@
 
 export const SET_ETH_CONNECTION = 'SET_ETH_CONNECTION'
 export const SET_BIDDING_TIME = 'SET_BIDDING_TIME'
+export const SET_AUCTION_END = 'SET_AUCTION_END'
 export const SET_WITHDRAWALS = 'SET_WITHDRAWALS'
 
 // event actions
@@ -46,6 +47,16 @@ export function setBiddingTime(biddingTime) {
   return {
     type: SET_BIDDING_TIME,
     biddingTime,
+  }
+}
+
+export function setAuctionEnd(auctionEnded, auctionEndTime, auctionTimeRemaining, auctionTimeRemainingSeconds) {
+  return {
+    type: SET_AUCTION_END,
+    auctionEnded,
+    auctionEndTime,
+    auctionTimeRemaining,
+    auctionTimeRemainingSeconds,
   }
 }
 

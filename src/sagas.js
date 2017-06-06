@@ -7,6 +7,7 @@ import Notifications from 'react-notification-system-redux'
 import {
   setEthConnection,
   setBiddingTime,
+  setAuctionEnd,
   setWithdrawals,
 
   NEW_AUCTION,
@@ -31,6 +32,8 @@ import {
  import {
    hexStringsToString,
    stringToHexStrings,
+   auctionTimeRemaining,
+   auctionTimeRemainingSeconds,
  } from './utils'
 
 var store
@@ -117,14 +120,16 @@ function* watchAuction(config) {
   yield takeEvery(RESET_AUCTION, resetAuction, auction)
   yield takeEvery(WITHDRAW, withdraw, auction)
   // other side effects
-  yield takeEvery([END_AUCTION, HIGHEST_BID_INCREASED, WITHDRAWAL], checkWithdrawal, auction)
+  yield takeEvery([END_AUCTION, HIGHEST_BID_INCREASED, WITHDRAWAL], updateWithdrawals, auction)
+  yield takeEvery(NEW_AUCTION, updateAuctionEnded, auction)
   // notifications
   yield takeEvery(END_AUCTION, alertEndAuction, auction)
   yield takeEvery(HIGHEST_BID_INCREASED, alertHighestBidIncreased, auction)
   yield takeEvery(WITHDRAWAL, alertWithdrawal, auction)
   // set up / watch auction
   yield setAuctionBiddingTime(auction)
-  yield watchAuctionEvents(auction)
+  yield fork(watchAuctionEnded, auction)
+  yield fork(watchAuctionEvents, auction)
 }
 
 function* sendBid(auction, action) {
@@ -157,7 +162,7 @@ function* withdraw(auction, action) {
   }
 }
 
-function* checkWithdrawal(auction) {
+function* updateWithdrawals(auction) {
   const accounts = yield web3.eth.accounts
   var withdrawals = {}
   for(const account of accounts) {
@@ -288,4 +293,20 @@ function* watchAuctionEvents(auction) {
       processWithdrawal(result)
     }
   })
+}
+
+function* updateAuctionEnded(auction) {
+  const auctionEnded = yield promisify(auction.auctionOver, auction)()
+  const auctionEndTime = yield promisify(auction.auctionEndTime, auction)()
+  const auctionEndDate = yield new Date(auctionEndTime.toNumber() * 1000)
+  const timeRemaining = yield auctionTimeRemaining(auctionEndDate)
+  const timeRemainingSeconds = yield auctionTimeRemainingSeconds(auctionEndDate)
+  yield put(setAuctionEnd(auctionEnded, auctionEndDate, timeRemaining, timeRemainingSeconds))
+}
+
+function* watchAuctionEnded(auction) {
+  while(true) {
+    yield updateAuctionEnded(auction)
+    yield delay(1500)
+  }
 }

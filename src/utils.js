@@ -1,4 +1,7 @@
 import { TextEncoder, TextDecoder } from 'text-encoding'
+import moment from 'moment'
+
+moment().format()
 
 const chunk_size = 32
 const num_chunks = 4
@@ -73,10 +76,13 @@ export function stringLengthRemaining(str) {
   const arr = utf8_encoder.encode(str)
   return (chunk_size * num_chunks) - arr.length
 }
+
 // date utils
 
-export function endDate(startDate, durationSeconds) {
-  var endDate = new Date(startDate)
-  endDate.setSeconds(endDate.getSeconds + durationSeconds)
-  return endDate
+export function auctionTimeRemaining(auctionEndTime) {
+  return moment(auctionEndTime).fromNow()
+}
+
+export function auctionTimeRemainingSeconds(auctionEndTime) {
+  return (new Date()) - auctionEndTime
 }

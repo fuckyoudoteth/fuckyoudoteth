@@ -49,10 +49,18 @@ class BidForm extends React.Component {
     return !Number.isNaN(parseFloat(this.state.bid))
   }
 
+  higherBid(bid) {
+    if(this.props.auctionEnded && bid > 0 || bid > this.props.currentAuction.bid) {
+      return true
+    } else {
+      return false
+    }
+  }
+
   bidHelp() {
     if(!this.validBid()) {
       return <p className='help is-danger'>Bid must be a number</p>
-    } else if(!(this.state.bid > this.props.currentAuction.bid)) {
+    } else if(!this.higherBid(this.state.bid)) {
       return <p className='help is-danger'>Bid higher than the current highest bid required</p>
     } else {
       return <p className='help'>Bid in ETH</p>
@@ -87,13 +95,13 @@ class BidForm extends React.Component {
   validBidForm() {
     return !this.props.pendingBid &&
       this.validBid() &&
-      (this.state.bid > this.props.currentAuction.bid) &&
+      this.higherBid(this.state.bid) &&
       (this.validDonationAddress() || this.state.donationAddress === '') &&
       this.validMessage()
   }
 
   render() {
-    const bidStateClass = this.validBid() && this.state.bid > this.props.currentAuction.bid ?
+    const bidStateClass = this.validBid() && this.higherBid(this.state.bid) ?
         '' : 'is-danger'
     const donationAddressIcon = this.validDonationAddress() ?
       <div className='control'>
@@ -102,6 +110,9 @@ class BidForm extends React.Component {
     const donationAddressStateClass =
       this.validDonationAddress() || this.state.donationAddress === '' ?
         '' : 'is-danger'
+    const bidButtonText = !this.props.pendingBid ?
+      this.props.auctionEnded ?
+        'Start New Auction & Bid!' : 'Bid Now!' : 'Bidding...'
     return (
       <div>
         <div className='field'>
@@ -173,10 +184,7 @@ class BidForm extends React.Component {
                this.state.bid,
                this.state.donationAddress,
                this.state.message)}>
-          {
-            this.props.pendingBid ?
-              'Bidding...' : 'Bid Now!'
-          }
+          { bidButtonText }
         </div>
       </div>
     )
@@ -194,6 +202,8 @@ const BidFormWrapper = props => {
 const mapStateToProps = state => {
   return {
     eth: state.site.eth,
+    auctionEnded: state.site.auctionEnded,
+    biddingTime: state.site.biddingTime,
     currentAuction: state.site.currentAuction,
     pendingBid: state.site.pendingBid,
   }

@@ -1,6 +1,7 @@
 import {
   SET_ETH_CONNECTION,
   SET_BIDDING_TIME,
+  SET_AUCTION_END,
   SET_WITHDRAWALS,
   NEW_AUCTION,
   END_AUCTION,
@@ -35,6 +36,10 @@ const initialState = {
   // auction metadata
   auctionNumber: 0,
   auctionStartTime: new Date(),
+  auctionEndTime: new Date(),
+  auctionTimeRemaining: '',
+  auctionTimeRemainingSeconds: 0,
+  auctionEnded: false,
   biddingTime: 0,
   withdrawals: {},
   // auction data
@@ -46,7 +51,7 @@ const initialState = {
 }
 
 export default function reducer(state=initialState, action) {
-  console.log(action)
+  if(action.type !== SET_AUCTION_END) console.log(action)
   switch(action.type) {
   case SET_ETH_CONNECTION:
     let eth = {
@@ -58,6 +63,14 @@ export default function reducer(state=initialState, action) {
     return { ...state, eth }
   case SET_BIDDING_TIME:
     return { ...state, biddingTime: action.biddingTime }
+  case SET_AUCTION_END:
+    return {
+      ...state,
+      auctionEndTime: action.auctionEndTime,
+      auctionEnded: action.auctionEnded,
+      auctionTimeRemaining: action.auctionTimeRemaining,
+      auctionTimeRemainingSeconds: action.auctionTimeRemainingSeconds,
+    }
   case SET_WITHDRAWALS:
     return {
       ...state,
