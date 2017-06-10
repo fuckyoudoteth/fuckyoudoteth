@@ -40,9 +40,6 @@ document.onreadystatechange = () => {
   if (document.readyState === 'complete') {
     sagaMiddleware.run(sagas, constants, store)
   }
-  if (typeof window.callPhantom === 'function') {
-    window.callPhantom({dataz: 'lol'})
-  }
 }
 
 render(<App store={store} history={history} />, document.getElementById('app'))

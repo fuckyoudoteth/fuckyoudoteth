@@ -27,7 +27,7 @@ class WithdrawalStatus extends React.Component {
   }
   render() {
     if(!this.state.currentWithdrawal) {
-      return <div />
+      return <div>No Pending Withdrawals</div>
     }
 
     const address = this.state.currentWithdrawal
@@ -35,30 +35,32 @@ class WithdrawalStatus extends React.Component {
     const pending = this.props.pendingWithdrawals[address] || false
 
     return (
-      <div className='level'>
-        <div className='level-left'>
+      <div className='field'>
+        <div className='level'>
           <div className='level-item'>
-            <Identicon address={address} />
+            <div className='field is-grouped'>
+              <div className='control'>
+                <Identicon address={address} />
+              </div>
+              <div className='control'>
+              {
+                Object.keys(this.props.withdrawals).length == 1 ?
+                  <div className='content'>
+                    {address}
+                  </div> :
+                  <div className='select'>
+                    <select value={address}
+                            onChange={this.toggleCurrentWithdrawal.bind(this)}>
+                      {
+                        Object.keys(this.props.withdrawals)
+                          .map(a => <option key={a}>{a}</option>)
+                      }
+                    </select>
+                  </div>
+              }
+              </div>
+            </div>
           </div>
-          <div className='level-item'>
-            {
-              Object.keys(this.props.withdrawals).length == 1 ?
-                <div className='content'>
-                  {address}
-                </div> :
-                <div className='select'>
-                  <select value={address}
-                          onChange={this.toggleCurrentWithdrawal.bind(this)}>
-                    {
-                      Object.keys(this.props.withdrawals)
-                        .map(a => <option key={a}>{a}</option>)
-                    }
-                  </select>
-                </div>
-            }
-          </div>
-        </div>
-        <div className='level-right'>
           <div className='level-item'>
             <div className='button'
                  disabled={pending}

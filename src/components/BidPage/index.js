@@ -7,10 +7,12 @@ import WithdrawalStatus from '../WithdrawalStatus'
 const BidPage = props => {
   return (
     <div>
-      <WithdrawalStatus />
+      <div className='title'>Current Auction Status</div>
       <CurrentAuctionStatus />
       <div className='title'>New Bid</div>
       <BidForm />
+      <div className='title'>Pending Withdrawals</div>
+      <WithdrawalStatus />
     </div>
   )
 }

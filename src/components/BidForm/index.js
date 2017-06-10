@@ -114,7 +114,7 @@ class BidForm extends React.Component {
       this.props.auctionEnded ?
         'Start New Auction & Bid!' : 'Bid Now!' : 'Bidding...'
     return (
-      <div>
+      <div className='field'>
         <div className='field'>
           <label className='label'>Bidder</label>
           <div className='field-body'>
