@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { newAuction } from '../../reducer'
+import { getAuctionBid } from '../../selectors'
 
 import Identicon from '../Identicon'
 //  <Identicon address={props.donationAddress} />
@@ -9,7 +9,7 @@ const Auction = props => {
   return (
     <div className='card'>
       {
-        props.bid && props.bid != '0' ?
+        props.amount && props.amount != '0' ?
           <div className='card-content'>
             <div className='title is-4'>Fuck you</div>
             <div className='title is-spaced'>{props.message}</div>
@@ -33,7 +33,7 @@ const Auction = props => {
         <div className='card-footer-item'>
           <div className='has-text-centered'>
             <div className='heading'>Winning Bid</div>
-            <div className='subtitle'>{props.bid} ETH</div>
+            <div className='subtitle'>{props.amount} ETH</div>
           </div>
         </div>
         {
@@ -53,7 +53,7 @@ const Auction = props => {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  return state.site.pastAuctions[ownProps.auctionNumber] || newAuction()
+  return getAuctionBid(state, ownProps)
 }
 
 export default connect(mapStateToProps)(Auction)

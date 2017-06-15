@@ -5,6 +5,13 @@ import {
   resetAuction
 } from '../../actions'
 
+import {
+  getCurrentAuctionBid,
+  getCurrentAuctionEnded,
+  getCurrentAuctionTimeRemaining,
+  getPendingReset
+} from '../../selectors'
+
 const AuctionTimeRemaining = props => {
   const heading = props.auctionEnded ?
     'Auction ended' : 'Auction will end'
@@ -22,7 +29,7 @@ const AuctionTimeRemaining = props => {
         <div className='level-item has-text-centered'>
           <div>
             <div className='heading'>Highest Bid</div>
-            <div className='subtitle'>{props.currentAuction.bid} ETH</div>
+            <div className='subtitle'>{props.currentAuction.amount} ETH</div>
           </div>
         </div>
         <div className='level-item has-text-centered'>
@@ -51,10 +58,10 @@ const AuctionTimeRemaining = props => {
 
 const mapStateToProps = state => {
   return {
-    auctionTimeRemaining: state.site.auctionTimeRemaining,
-    auctionEnded: state.site.auctionEnded,
-    currentAuction: state.site.currentAuction,
-    pendingReset: state.site.pendingReset,
+    auctionTimeRemaining: getCurrentAuctionTimeRemaining(state),
+    auctionEnded: getCurrentAuctionEnded(state),
+    currentAuction: getCurrentAuctionBid(state),
+    pendingReset: getPendingReset(state),
   }
 }
 

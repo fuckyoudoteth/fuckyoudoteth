@@ -1,9 +1,8 @@
 import {
   SET_ETH_CONNECTION,
   SET_BIDDING_TIME,
-  SET_AUCTION_END,
+  SET_AUCTION_TIME_REMAINING,
   SET_WITHDRAWALS,
-  NEW_AUCTION,
   END_AUCTION,
   HIGHEST_BID_INCREASED,
   SEND_BID,
@@ -17,12 +16,29 @@ import {
   WITHDRAW_FAILURE,
 } from './actions'
 
-export const newAuction = () => {
+export const newBid = (
+  bidder='0x0000000000000000000000000000000000000000',
+  amount=0,
+  donationAddress='0x0000000000000000000000000000000000000000',
+  message='',
+) => {
   return {
-    bidder: '0x0000000000000000000000000000000000000000',
-    bid: 0,
-    donationAddress: '0x0000000000000000000000000000000000000000',
-    message: '',
+    bidder,
+    amount,
+    donationAddress,
+    message,
+  }
+}
+
+export const newAuction = (
+  number=0,
+  endTime=new Date(),
+  highestBid=newBid(),
+) => {
+  return {
+    number,
+    endTime,
+    highestBid,
   }
 }
 
@@ -34,24 +50,23 @@ const initialState = {
     network: '',
   },
   // auction metadata
-  auctionNumber: 0,
-  auctionStartTime: new Date(),
-  auctionEndTime: new Date(),
-  auctionTimeRemaining: '',
-  auctionTimeRemainingSeconds: 0,
-  auctionEnded: false,
   biddingTime: 0,
-  withdrawals: {},
   // auction data
-  currentAuction: newAuction(),
-  pastAuctions: {},
+  currentAuctionStatus: {
+    number: 0,
+    timeRemaining: '',
+    timeRemainingSeconds: 0,
+    ended: true,
+  },
+  auctions: {},
+  withdrawals: {},
   pendingBid: null,
   pendingReset: null,
   pendingWithdrawals: {},
 }
 
 export default function reducer(state=initialState, action) {
-  if(action.type !== SET_AUCTION_END) console.log(action)
+  if(action.type !== SET_AUCTION_TIME_REMAINING) console.log(action)
   switch(action.type) {
   case SET_ETH_CONNECTION:
     let eth = {
@@ -63,13 +78,15 @@ export default function reducer(state=initialState, action) {
     return { ...state, eth }
   case SET_BIDDING_TIME:
     return { ...state, biddingTime: action.biddingTime }
-  case SET_AUCTION_END:
+  case SET_AUCTION_TIME_REMAINING:
     return {
       ...state,
-      auctionEndTime: action.auctionEndTime,
-      auctionEnded: action.auctionEnded,
-      auctionTimeRemaining: action.auctionTimeRemaining,
-      auctionTimeRemainingSeconds: action.auctionTimeRemainingSeconds,
+      currentAuctionStatus: {
+        ...state.currentAuctionStatus,
+        timeRemaining: action.auctionTimeRemaining,
+        timeRemainingSeconds: action.auctionTimeRemainingSeconds,
+        ended: action.auctionEnded,
+      },
     }
   case SET_WITHDRAWALS:
     return {
@@ -77,51 +94,55 @@ export default function reducer(state=initialState, action) {
       withdrawals: action.withdrawals,
       pendingWithdrawals: action.pendingWithdrawals,
     }
-  case NEW_AUCTION:
-    if(action.auctionNumber > state.auctionNumber) {
-      return {
-        ...state,
-        auctionNumber: action.auctionNumber,
-        auctionStartTime: action.auctionStartTime,
-        currentAuction: newAuction(),
-      }
-    }
   case END_AUCTION:
     return {
       ...state,
       pendingReset: null,
-      pastAuctions: {
-        ...state.pastAuctions,
-        [action.auctionNumber]: {
-          bidder: action.bidder,
-          bid: action.bid,
-          donationAddress: action.donationAddress,
-          message: action.message,
-        },
+      currentAuctionStatus: {
+        ...state.currentAuctionStatus,
+        number: action.auctionNumber,
+        ended: false,
+      },
+      auctions: {
+        ...state.auctions,
+        [action.actionNumber + 1]: newAuction(
+          action.auctionNumber + 1,
+          new Date(Number(action.auctionEndTime) + (state.biddingTime * 1000)),
+          newBid()),
+        [action.auctionNumber]: newAuction(
+          action.auctionNumber,
+          action.auctionEndTime,
+          newBid(
+            action.bidder,
+            action.amount,
+            action.donationAddress,
+            action.message))
       },
     }
   case HIGHEST_BID_INCREASED:
-    if(action.auctionNumber == state.auctionNumber) {
-      return {
-        ...state,
-        pendingBid: null,
-        currentAuction: {
-          bidder: action.bidder,
-          bid: action.bid,
-          donationAddress: action.donationAddress,
-          message: action.message,
-        },
-      }
+    return {
+      ...state,
+      pendingBid: null,
+      auctions: {
+        ...state.auctions,
+        [action.auctionNumber] : {
+          ...state.auctions[auctionNumber],
+          highestBid: newBid(
+            action.bidder,
+            action.amount,
+            action.donationAddress,
+            action.message)
+        }
+      },
     }
   case SEND_BID:
     return {
       ...state,
-      pendingBid: {
-        bidder: action.bidder,
-        bid: action.bid,
-        donationAddress: action.donationAddress,
-        message: action.message,
-      },
+      pendingBid: newBid(
+        action.bidder,
+        action.amount,
+        action.donationAddress,
+        action.message),
     }
   case SEND_BID_FAILURE:
     return {

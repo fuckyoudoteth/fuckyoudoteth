@@ -2,6 +2,10 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import { withdraw } from '../../actions'
+import {
+  getPendingWithdrawals,
+  getWithdrawals
+} from '../../selectors'
 
 import Identicon from '../Identicon'
 
@@ -79,8 +83,8 @@ class WithdrawalStatus extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    withdrawals: state.site.withdrawals,
-    pendingWithdrawals: state.site.pendingWithdrawals,
+    withdrawals: getWithdrawals(state),
+    pendingWithdrawals: getPendingWithdrawals(state),
   }
 }
 

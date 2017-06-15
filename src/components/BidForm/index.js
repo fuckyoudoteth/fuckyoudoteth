@@ -3,6 +3,12 @@ import { connect } from 'react-redux'
 
 import { stringLengthRemaining } from '../../utils'
 import { sendBid } from '../../actions'
+import {
+  getCurrentAuctionBid,
+  getCurrentAuctionEnded,
+  getEth,
+  getPendingBid
+} from '../../selectors'
 
 import Identicon from '../Identicon'
 
@@ -12,14 +18,14 @@ class BidForm extends React.Component {
     if(props.pendingBid) {
       this.state = {
         bidder: props.pendingBid.bidder,
-        bid: props.pendingBid.bid,
+        amount: props.pendingBid.amount,
         donationAddress: props.pendingBid.donationAddress,
         message: props.pendingBid.message,
       }
     } else {
       this.state = {
         bidder: web3.eth.defaultAccount,
-        bid: 0,
+        amount: 0,
         donationAddress: web3.eth.defaultAccount,
         message: '',
       }
@@ -30,7 +36,7 @@ class BidForm extends React.Component {
     if(nextProps.pendingBid) {
       this.setState({
         bidder: nextProps.pendingBid.bidder,
-        bid: nextProps.pendingBid.bid,
+        amount: nextProps.pendingBid.amount,
         donationAddress: nextProps.pendingBid.donationAddress,
         message: nextProps.pendingBid.message,
       })
@@ -42,15 +48,15 @@ class BidForm extends React.Component {
   }
 
   setBid(evt) {
-    this.setState({bid: evt.target.value})
+    this.setState({amount: evt.target.value})
   }
 
   validBid() {
-    return !Number.isNaN(parseFloat(this.state.bid))
+    return !Number.isNaN(parseFloat(this.state.amount))
   }
 
-  higherBid(bid) {
-    if(this.props.auctionEnded && bid > 0 || bid > this.props.currentAuction.bid) {
+  higherBid(amount) {
+    if(this.props.auctionEnded && amount > 0 || amount > this.props.currentAuction.amount) {
       return true
     } else {
       return false
@@ -60,8 +66,8 @@ class BidForm extends React.Component {
   bidHelp() {
     if(!this.validBid()) {
       return <p className='help is-danger'>Bid must be a number</p>
-    } else if(!this.higherBid(this.state.bid)) {
-      return <p className='help is-danger'>Bid higher than the current highest bid required</p>
+    } else if(!this.higherBid(this.state.amount)) {
+      return <p className='help is-danger'>Bid higher than the current highest amount required</p>
     } else {
       return <p className='help'>Bid in ETH</p>
     }
@@ -95,13 +101,13 @@ class BidForm extends React.Component {
   validBidForm() {
     return !this.props.pendingBid &&
       this.validBid() &&
-      this.higherBid(this.state.bid) &&
+      this.higherBid(this.state.amount) &&
       (this.validDonationAddress() || this.state.donationAddress === '') &&
       this.validMessage()
   }
 
   render() {
-    const bidStateClass = this.validBid() && this.higherBid(this.state.bid) ?
+    const bidStateClass = this.validBid() && this.higherBid(this.state.amount) ?
         '' : 'is-danger'
     const donationAddressIcon = this.validDonationAddress() ?
       <div className='control'>
@@ -115,6 +121,7 @@ class BidForm extends React.Component {
         'Start New Auction & Bid!' : 'Bid Now!' : 'Bidding...'
     return (
       <div className='field'>
+
         <div className='field'>
           <label className='label'>Bidder</label>
           <div className='field-body'>
@@ -134,31 +141,15 @@ class BidForm extends React.Component {
         </div>
 
         <div className='field'>
-          <label className='label'>Bid</label>
+          <label className='label'>Bid Amount</label>
           <p className='control'>
             <input className={`input ${bidStateClass}`}
                    type='text'
                    placeholder='Bid in ETH'
-                   value={this.state.bid}
+                   value={this.state.amount}
                    onChange={this.setBid.bind(this)} />
           </p>
           {this.bidHelp()}
-        </div>
-
-        <div className='field'>
-          <label className='label'>Donation Address</label>
-          <div className='field-body'>
-            <div className='field is-grouped'>
-              { donationAddressIcon }
-              <p className='control is-expanded'>
-                <input className={`input ${donationAddressStateClass}`}
-                       type='text'
-                       placeholder='Optional Donation Address'
-                       value={this.state.donationAddress}
-                       onChange={this.setDonationAddress.bind(this)} />
-              </p>
-            </div>
-          </div>
         </div>
 
         <div className='field'>
@@ -176,12 +167,27 @@ class BidForm extends React.Component {
           </p>
         </div>
 
+        <div className='field'>
+          <label className='label'>Donation Address</label>
+          <div className='field is-grouped'>
+            { donationAddressIcon }
+            <p className='control is-expanded'>
+              <input className={`input ${donationAddressStateClass}`}
+                     type='text'
+                     placeholder='Optional Donation Address'
+                     value={this.state.donationAddress}
+                     onChange={this.setDonationAddress.bind(this)} />
+            </p>
+          </div>
+          <p className='help'>Optional ethereum address to show along with message</p>
+        </div>
+
         <div className='button is-primary'
              disabled={!this.validBidForm()}
              onClick={this.props.sendBid.bind(
                this,
                this.state.bidder,
-               this.state.bid,
+               this.state.amount,
                this.state.donationAddress,
                this.state.message)}>
           { bidButtonText }
@@ -201,17 +207,16 @@ const BidFormWrapper = props => {
 
 const mapStateToProps = state => {
   return {
-    eth: state.site.eth,
-    auctionEnded: state.site.auctionEnded,
-    biddingTime: state.site.biddingTime,
-    currentAuction: state.site.currentAuction,
-    pendingBid: state.site.pendingBid,
+    eth: getEth(state),
+    auctionEnded: getCurrentAuctionEnded(state),
+    currentAuction: getCurrentAuctionBid(state),
+    pendingBid: getPendingBid(state),
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    sendBid: (bidder, bid, donationAddress, message) => dispatch(sendBid(bidder, bid, donationAddress, message))
+    sendBid: (bidder, amount, donationAddress, message) => dispatch(sendBid(bidder, amount, donationAddress, message))
   }
 }
 

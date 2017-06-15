@@ -5,7 +5,7 @@ import './owned.sol';
 contract FuckYouAuction is owned {
     struct Bid {
       address bidder;
-      uint bid;
+      uint amount;
       address donationAddress;
       bytes32 msg0;
       bytes32 msg1;
@@ -41,7 +41,7 @@ contract FuckYouAuction is owned {
       uint indexed auctionNumber,
       address indexed bidder,
       address indexed donationAddress,
-      uint bid,
+      uint amount,
       bytes32 msg0,
       bytes32 msg1,
       bytes32 msg2,
@@ -49,17 +49,14 @@ contract FuckYouAuction is owned {
     );
     event AuctionEnded(
       uint indexed auctionNumber,
+      uint auctionEndTime,
       address indexed bidder,
       address indexed donationAddress,
-      uint bid,
+      uint amount,
       bytes32 msg0,
       bytes32 msg1,
       bytes32 msg2,
       bytes32 msg3
-    );
-    event NewAuction(
-      uint indexed auctionNumber,
-      uint auctionStartTime
     );
     event Withdrawal(
       address indexed withdrawer,
@@ -93,16 +90,23 @@ contract FuckYouAuction is owned {
 
     // bump all auction metadata for a next auction
     function incrementAuctionState() internal {
+        // Send 'auction ended' event
+        AuctionEnded(
+          auctionNumber,
+          now,
+          winning.bidder,
+          winning.donationAddress,
+          winning.amount,
+          winning.msg0,
+          winning.msg1,
+          winning.msg2,
+          winning.msg3
+        );
+
         auctionNumber += 1;
         auctionStartTime = now;
         auctionStartBlock = block.number;
         history[auctionNumber] = auctionStartBlock;
-
-        // Send 'new action' event
-        NewAuction(
-          auctionNumber,
-          auctionStartTime
-        );
     }
 
     function resetAuction() {
@@ -117,19 +121,7 @@ contract FuckYouAuction is owned {
         highest = Bid(0,0,0,0,0,0,0);
 
         // Increment the beneficiary's stash
-        beneficiaryTotal += winning.bid;
-
-        // Send 'auction ended' event
-        AuctionEnded(
-          auctionNumber,
-          winning.bidder,
-          winning.donationAddress,
-          winning.bid,
-          winning.msg0,
-          winning.msg1,
-          winning.msg2,
-          winning.msg3
-        );
+        beneficiaryTotal += winning.amount;
 
         // Increment auction variables
         incrementAuctionState();
@@ -157,7 +149,7 @@ contract FuckYouAuction is owned {
 
         // If the bid is not higher, send the
         // money back.
-        require(msg.value > highest.bid);
+        require(msg.value > highest.amount);
 
         if (highest.bidder != 0) {
             // Sending back the money by simply using
@@ -165,7 +157,7 @@ contract FuckYouAuction is owned {
             // because it can be prevented by the caller by e.g.
             // raising the call stack to 1023. It is always safer
             // to let the recipients withdraw their money themselves.
-            pendingReturns[highest.bidder] += highest.bid;
+            pendingReturns[highest.bidder] += highest.amount;
         }
 
         // set current highest bidder's data
@@ -177,7 +169,7 @@ contract FuckYouAuction is owned {
           _msg1,
           _msg2,
           _msg3
-        )
+        );
 
         HighestBidIncreased(
           auctionNumber,

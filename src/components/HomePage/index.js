@@ -1,6 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
+import { getAuctionNumber } from '../../selectors'
+
 import Auction from '../Auction'
 
 const HomePage = props => {
@@ -14,7 +16,7 @@ const HomePage = props => {
 
 const mapStateToProps = state => {
   return {
-    auctionNumber: state.site.auctionNumber - 1,
+    auctionNumber: getAuctionNumber(state) - 1,
   }
 }
 export default connect(mapStateToProps)(HomePage)

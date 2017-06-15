@@ -7,11 +7,9 @@ import Notifications from 'react-notification-system-redux'
 import {
   setEthConnection,
   setBiddingTime,
-  setAuctionEnd,
+  setAuctionTimeRemaining,
   setWithdrawals,
 
-  NEW_AUCTION,
-  newAuction,
   END_AUCTION,
   endAuction,
   HIGHEST_BID_INCREASED,
@@ -121,7 +119,7 @@ function* watchAuction(config) {
   yield takeEvery(WITHDRAW, withdraw, auction)
   // other side effects
   yield takeEvery([END_AUCTION, HIGHEST_BID_INCREASED, WITHDRAWAL], updateWithdrawals, auction)
-  yield takeEvery(NEW_AUCTION, updateAuctionEnded, auction)
+  yield takeEvery(END_AUCTION, updateAuctionEnded, auction)
   // notifications
   yield takeEvery(END_AUCTION, alertEndAuction, auction)
   yield takeEvery(HIGHEST_BID_INCREASED, alertHighestBidIncreased, auction)
@@ -135,13 +133,13 @@ function* watchAuction(config) {
 function* sendBid(auction, action) {
   const [msg0, msg1, msg2, msg3] = yield stringToHexStrings(action.message)
   try {
-    const bid = yield promisify(auction.bid, auction)(
+    const amount = yield promisify(auction.bid, auction)(
       action.donationAddress,
       msg0, msg1, msg2, msg3,
-      {from: action.bidder, value: web3.toWei(action.bid, 'ether')})
+      {from: action.bidder, value: web3.toWei(action.amount, 'ether')})
     yield put(sendBidSuccess())
   } catch(e) {
-    yield put(sendBidFailure())
+    yield put(sendBidFailure(e))
   }
 }
 
@@ -203,7 +201,7 @@ function* alertHighestBidIncreased(auction, action) {
   if(currentBlock.number - auctionEndBlock.toNumber() <= 1) {
   //if(!web3.eth.accounts.find(action.bidder)) {
     const bidNotification = {
-      message: `New Bid: ${action.bid} ETH`,
+      message: `New Bid: ${action.amount} ETH`,
       position: 'tr',
     }
     yield put(Notifications.info(bidNotification))
@@ -227,16 +225,11 @@ function* setAuctionBiddingTime(auction) {
 
 // process events
 
-function processNewAuctionEvent(event) {
-  const auctionNumber = event.args.auctionNumber.toNumber()
-  const auctionStartTime = new Date(event.args.auctionStartTime.toNumber() * 1000)
-  store.dispatch(newAuction(auctionNumber, auctionStartTime))
-}
-
 function processAuctionEndedEvent(event) {
   const auctionNumber = event.args.auctionNumber.toNumber()
+  const auctionEndTime = new Date(event.args.auctionEndTime.toNumber() * 1000)
   const winner = event.args.bidder
-  const amount = web3.fromWei(event.args.bid.toNumber(), 'ether')
+  const amount = web3.fromWei(event.args.amount.toNumber(), 'ether')
   const donationAddress = event.args.donationAddress
   const message = hexStringsToString(
     event.args.msg0,
@@ -244,13 +237,13 @@ function processAuctionEndedEvent(event) {
     event.args.msg2,
     event.args.msg3,
   )
-  store.dispatch(endAuction(auctionNumber, winner, amount, donationAddress, message))
+  store.dispatch(endAuction(auctionNumber, auctionEndTime, winner, amount, donationAddress, message))
 }
 
 function processHighestBidIncreasedEvent(event) {
   const auctionNumber = event.args.auctionNumber.toNumber()
   const winner = event.args.bidder
-  const amount = web3.fromWei(event.args.bid.toNumber(), 'ether')
+  const amount = web3.fromWei(event.args.amount.toNumber(), 'ether')
   const donationAddress = event.args.donationAddress
   const message = hexStringsToString(
     event.args.msg0,
@@ -273,11 +266,6 @@ function* watchAuctionEvents(auction) {
   toBlock += 100000
   var fromBlock = yield promisify(auction.auctionStartBlock, auction)()
   fromBlock = yield fromBlock.toNumber()
-  auction.NewAuction({}, {fromBlock, toBlock}, function(error, result) {
-    if(!error) {
-      processNewAuctionEvent(result)
-    }
-  })
   auction.AuctionEnded({}, {fromBlock, toBlock}, function(error, result) {
     if(!error) {
       processAuctionEndedEvent(result)
@@ -301,7 +289,7 @@ function* updateAuctionEnded(auction) {
   const auctionEndDate = yield new Date(auctionEndTime.toNumber() * 1000)
   const timeRemaining = yield auctionTimeRemaining(auctionEndDate)
   const timeRemainingSeconds = yield auctionTimeRemainingSeconds(auctionEndDate)
-  yield put(setAuctionEnd(auctionEnded, auctionEndDate, timeRemaining, timeRemainingSeconds))
+  yield put(setAuctionTimeRemaining(auctionEnded, auctionEndDate, timeRemaining, timeRemainingSeconds))
 }
 
 function* watchAuctionEnded(auction) {
