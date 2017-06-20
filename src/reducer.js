@@ -100,7 +100,7 @@ export default function reducer(state=initialState, action) {
       pendingReset: null,
       currentAuctionStatus: {
         ...state.currentAuctionStatus,
-        number: action.auctionNumber,
+        number: action.auctionNumber + 1,
         ended: false,
       },
       auctions: {
@@ -126,7 +126,7 @@ export default function reducer(state=initialState, action) {
       auctions: {
         ...state.auctions,
         [action.auctionNumber] : {
-          ...state.auctions[auctionNumber],
+          ...state.auctions[action.auctionNumber],
           highestBid: newBid(
             action.bidder,
             action.amount,

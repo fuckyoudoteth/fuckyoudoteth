@@ -17,7 +17,7 @@ const Nav = props => {
         <Link className='nav-item'
               to='/'>Home</Link>
         <Link className='nav-item'
-              to='/amount'>Bid</Link>
+              to='/bid'>Bid</Link>
         <Link className='nav-item'
               to='/About'>About</Link>
       </div>

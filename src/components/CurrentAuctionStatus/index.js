@@ -15,44 +15,41 @@ import {
 const AuctionTimeRemaining = props => {
   const heading = props.auctionEnded ?
     'Auction ended' : 'Auction will end'
+    console.log('props',props)
   return (
-    <div className='field'>
-      <nav className='level'>
-        <div className='level-item has-text-centered'>
-          <div>
-            <div className='heading'>Message</div>
-            <div className='content'>{props.currentAuction.message}</div>
-          </div>
+    <nav className='level is-vertical'>
+      <div className='level-item has-text-centered'>
+        <div>
+          <div className='heading'>Message</div>
+          <div className='content'>{props.currentAuction.message}</div>
         </div>
-      </nav>
-      <nav className='level'>
-        <div className='level-item has-text-centered'>
-          <div>
-            <div className='heading'>Highest Bid</div>
-            <div className='subtitle'>{props.currentAuction.amount} ETH</div>
-          </div>
+      </div>
+      <div className='level-item has-text-centered'>
+        <div>
+          <div className='heading'>Highest Bid</div>
+          <div className='subtitle'>{props.currentAuction.amount} ETH</div>
         </div>
-        <div className='level-item has-text-centered'>
-          <div>
-            <div className='heading'>{heading}</div>
-            <div className='subtitle'>{props.auctionTimeRemaining}</div>
-          </div>
+      </div>
+      <div className='level-item has-text-centered'>
+        <div>
+          <div className='heading'>{heading}</div>
+          <div className='subtitle'>{props.auctionTimeRemaining}</div>
         </div>
-        {
-          props.auctionEnded ?
-            <div className='level-item has-text-centered'>
-              <a className='button'
-                 disabled={props.pendingReset}
-                 onClick={props.resetAuction.bind(this)}>
-                {
-                  props.pendingReset ?
-                    'Resetting...': 'Reset Auction'
-                }
-              </a>
-            </div> : null
-        }
-      </nav>
-    </div>
+      </div>
+      {
+        props.auctionEnded ?
+          <div className='level-item has-text-centered'>
+            <a className='button'
+               disabled={props.pendingReset}
+               onClick={props.resetAuction.bind(this)}>
+              {
+                props.pendingReset ?
+                  'Resetting...': 'Reset Auction'
+              }
+            </a>
+          </div> : null
+      }
+    </nav>
   )
 }
 
