@@ -15,7 +15,6 @@ import {
 const AuctionTimeRemaining = props => {
   const heading = props.auctionEnded ?
     'Auction ended' : 'Auction will end'
-    console.log('props',props)
   return (
     <nav className='level is-vertical'>
       <div className='level-item has-text-centered'>
