@@ -276,7 +276,7 @@ function* watchAuctionEvents(auction) {
       processHighestBidIncreasedEvent(result)
     }
   })
-  auction.Withdrawal({}, {fromBlock, toBlock, topics: web3.eth.accounts}, function(error, result) {
+  auction.Withdrawal({withdrawer: web3.eth.accounts}, {fromBlock, toBlock}, function(error, result) {
     if(!error) {
       processWithdrawal(result)
     }

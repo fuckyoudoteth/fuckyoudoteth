@@ -34,15 +34,18 @@ function bytesToHex(byteArrayData) {
 // hex string => Uint8Array
 function hexToBytes(str) {
   if (!str) {
-    return new Uint8Array();
+    return new Uint8Array()
   }
 
-  var a = [];
+  var a = []
   for (var i = 0, len = str.length; i < len; i+=2) {
-    a.push(parseInt(str.substr(i,2),16));
+    const num = parseInt(str.substr(i, 2), 16)
+    if(num) {
+      a.push(num)
+    }
   }
 
-  return new Uint8Array(a);
+  return new Uint8Array(a)
 }
 
 // Ethereum state => message string

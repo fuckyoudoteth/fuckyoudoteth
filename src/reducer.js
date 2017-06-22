@@ -66,7 +66,6 @@ const initialState = {
 }
 
 export default function reducer(state=initialState, action) {
-  if(action.type !== SET_AUCTION_TIME_REMAINING) console.log(action)
   switch(action.type) {
   case SET_ETH_CONNECTION:
     let eth = {

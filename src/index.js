@@ -10,7 +10,9 @@ import {
   routerReducer
 } from 'react-router-redux'
 
-import {reducer as notifications} from 'react-notification-system-redux'
+import { createLogger } from "redux-logger"
+
+import { reducer as notifications } from 'react-notification-system-redux'
 
 import 'bulma'
 import './styles.css'
@@ -19,20 +21,33 @@ import constants from '../constants'
 
 import reducer from './reducer'
 import sagas from './sagas'
+import { SET_AUCTION_TIME_REMAINING } from './actions'
 
 import App from './components/App'
 
 const history = createHashHistory()
 
+const middlewares = []
+
 const sagaMiddleware = createSagaMiddleware()
 const routerMiddleware = reactRouterMiddleware(history)
+
+middlewares.push(sagaMiddleware, routerMiddleware)
+
+if(process.env.NODE_ENV !== "production") {
+  middlewares.push(
+    createLogger({
+      predicate: (getState, action) => action.type !== SET_AUCTION_TIME_REMAINING
+    })
+  )
+}
 
 let store = createStore(combineReducers({
   site: reducer,
   router: routerReducer,
   notifications,
 }), //compose(
-  applyMiddleware(sagaMiddleware, routerMiddleware) //,
+  applyMiddleware(...middlewares) //,
   //window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 ) //)
 

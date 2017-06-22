@@ -1,4 +1,6 @@
-var path = require('path')
+const path = require('path')
+const webpack = require('webpack')
+
 module.exports = {
   entry: './src/index.js',
   output: {
@@ -41,6 +43,13 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      "process.env": {
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV || "development")
+      }
+    }),
+  ],
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
     port: 9000,
