@@ -4,6 +4,7 @@ import createCachedSelector from 're-reselect'
 import { newAuction } from './reducer'
 
 export const getEth = state => state.site.eth
+export const getEthRWStatus = state => state.site.eth.node
 
 // get auction number supplied by props or current auction number
 export const getAuctionNumber = (state, props) =>

@@ -5,6 +5,7 @@ import { getAuctionNumber } from '../../selectors'
 
 import AuctionHero from '../AuctionHero'
 import CallToAuction from '../CallToAuction'
+import StepsSection from '../StepsSection'
 import Footer from '../Footer'
 
 const LandingPage = props => {
@@ -12,6 +13,7 @@ const LandingPage = props => {
     <div>
       <AuctionHero {...props} />
       <CallToAuction />
+      <StepsSection />
       <Footer />
     </div>
   )

@@ -3,6 +3,10 @@ body, #app {
   min-height: 100vh;
 }
 
+.full-height {
+  min-height: 100vh;
+}
+
 #wrapper {
   min-height: 100vh;
   display: flex;

@@ -9,10 +9,11 @@ import {
   getCurrentAuctionBid,
   getCurrentAuctionEnded,
   getCurrentAuctionTimeRemaining,
+  getEthRWStatus,
   getPendingReset
 } from '../../selectors'
 
-const AuctionTimeRemaining = props => {
+const CurrentAuctionStatus = props => {
   const heading = props.auctionEnded ?
     'Auction ended' : 'Auction will end'
   return (
@@ -36,7 +37,7 @@ const AuctionTimeRemaining = props => {
         </div>
       </div>
       {
-        props.auctionEnded ?
+        props.auctionEnded && props.eth ?
           <div className='level-item has-text-centered'>
             <a className='button'
                disabled={props.pendingReset}
@@ -54,6 +55,7 @@ const AuctionTimeRemaining = props => {
 
 const mapStateToProps = state => {
   return {
+    eth: getEthRWStatus(state),
     auctionTimeRemaining: getCurrentAuctionTimeRemaining(state),
     auctionEnded: getCurrentAuctionEnded(state),
     currentAuction: getCurrentAuctionBid(state),
@@ -66,4 +68,4 @@ const mapDispatchToProps = dispatch => {
     resetAuction: () => dispatch(resetAuction())
   }
 }
-export default connect(mapStateToProps, mapDispatchToProps)(AuctionTimeRemaining)
+export default connect(mapStateToProps, mapDispatchToProps)(CurrentAuctionStatus)

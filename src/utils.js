@@ -19,7 +19,7 @@ function bytesToHex(byteArrayData) {
   while (i < len) {
     var a = byteArrayData[i],
       h
-    if (a < 10) {
+    if (a < 16) {
       h = "0" + a.toString(16)
     } else {
       h = a.toString(16)
@@ -60,7 +60,7 @@ export function hexStringsToString(...strings) {
 export function stringToHexStrings(str) {
   var arr = utf8_encoder.encode(str)
   var arrs = []
-  for(var i = 0; i < arr.length / chunk_size; i += chunk_size) {
+  for(var i = 0; i < arr.length; i += chunk_size) {
     var chunk = arr.slice(i, i + chunk_size)
     if(chunk.length < chunk_size) {
       var newChunk = new Uint8Array(chunk_size)

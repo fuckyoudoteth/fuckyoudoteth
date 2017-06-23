@@ -4,6 +4,7 @@ import { call, cps, put, take, race, select, fork, cancel, cancelled } from 'red
 import { LOCATION_CHANGE } from 'react-router-redux'
 import Notifications from 'react-notification-system-redux'
 import {
+  SET_ETH_CONNECTION,
   setEthConnection,
   setBiddingTime,
   setAuctionTimeRemaining,
@@ -31,8 +32,10 @@ import {
  } from './actions'
 
  import {
+   getEthRWStatus,
    getPendingBid,
    getPendingReset,
+   getPendingWithdrawals,
  } from './selectors'
 
  import {
@@ -46,9 +49,9 @@ var store
 
 export default function* rootSaga(config, theStore) {
   store = theStore
+  yield fork(watchAuction, config.contracts.FuckYouAuction)
   yield startEthConnection()
   yield fork(watchEthConnection)
-  yield fork(watchAuction, config.contracts.FuckYouAuction)
 }
 
 // Eth sagas
@@ -61,17 +64,29 @@ function* startEthConnection() {
   yield put(setEthConnection(node, connected, network))
 }
 
-function initEth() {
+const infuraUrl = 'https://mainnet.infura.io/9A2BCvScLiNdmOTuDiGg'
+
+function* initEth() {
+  const setFallbackWeb3 = (W3, connected) => {
+    if(!connected) {
+      window.web3 = new Web3(new Web3.providers.HttpProvider(infuraUrl))
+      return false
+    } else {
+      return true
+    }
+  }
   if(typeof window.web3 !== 'undefined') {
     window.web3 = new Web3(web3.currentProvider)
-    return true
+    // quick connection check
+    // required for injected web3 that thinks its connected
+    try {
+      const resp = yield cps([web3.eth, web3.eth.getBlock], 0)
+    } catch(e) {}
+    const connected = yield web3.currentProvider.isConnected()
+    return setFallbackWeb3(Web3, connected)
   } else {
     let Web3 = require('web3')
-    window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
-    //window.web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8080/rpc/"))
-    // web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io"))
-    //window.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io"))
-    return false
+    return setFallbackWeb3(Web3, false)
   }
 }
 
@@ -121,6 +136,65 @@ function* watchEthConnection() {
 
 function* watchAuction(config) {
   var auction = yield web3.eth.contract(config.abi).at(config.address)
+  yield take(SET_ETH_CONNECTION)
+  const isRW = yield select(getEthRWStatus)
+  if(isRW) {
+    yield watchAuctionRW(auction)
+  } else {
+    yield watchAuctionRO(auction)
+  }
+}
+
+function* watchAuctionRO(auction) {
+  yield setAuctionBiddingTime(auction)
+  yield fork(watchAuctionTimeRemaining, auction)
+
+  var lastBlock = 0
+  while(true) {
+    var currentBlock = yield cps([web3.eth, web3.eth.getBlock], 'latest')
+    currentBlock = currentBlock.number
+    if(lastBlock != currentBlock) {
+      yield updateAuctionState(auction, currentBlock)
+    }
+    yield delay(7000)
+    lastBlock = currentBlock
+  }
+}
+
+function parseBid(bidArr) {
+  return [
+    bidArr[0],
+    web3.fromWei(bidArr[1].toNumber(), 'ether'),
+    bidArr[2],
+    hexStringsToString(
+      bidArr[3],
+      bidArr[4],
+      bidArr[5],
+      bidArr[6],
+    ),
+  ]
+}
+
+function* updateAuctionState(auction, currentBlock) {
+  try {
+    var parsedBid
+    const number = yield cps([auction, auction.auctionNumber])
+    const auctionNumber = number.toNumber()
+    const endTime = yield cps([auction, auction.auctionEndTime])
+    const auctionEndTime = new Date(endTime.toNumber() * 1000)
+
+    const highest = yield cps([auction, auction.highest])
+    const winning = yield cps([auction, auction.winning])
+    parsedBid = yield parseBid(winning)
+    yield put(endAuction(auctionNumber - 1, auctionEndTime, currentBlock, parsedBid[0], parsedBid[1], parsedBid[2], parsedBid[3]))
+    parsedBid = yield parseBid(highest)
+    yield put(highestBidIncreased(auctionNumber, currentBlock, parsedBid[0], parsedBid[1], parsedBid[2], parsedBid[3]))
+  } catch(e) {
+    console.log(e)
+  }
+}
+
+function* watchAuctionRW(auction) {
   // user actions
   yield takeEvery(SEND_BID, sendBid, auction)
   yield takeEvery(RESET_AUCTION, resetAuction, auction)
@@ -197,7 +271,7 @@ function* updateWithdrawals(auction) {
         withdrawals[account] = balance
       }
   }
-  var pendingWithdrawals = yield select(state => state.site.pendingWithdrawals)
+  var pendingWithdrawals = yield select(getPendingWithdrawals)
   for(const address of Object.keys(pendingWithdrawals)) {
     if(!withdrawals[address]) {
       delete pendingWithdrawals[address]

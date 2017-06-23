@@ -16,7 +16,7 @@ const LandingApp = props => {
   return (
     <Provider store={props.store}>
       <ConnectedRouter history={props.history}>
-        <div id='wrapper'>
+        <div className='full-height'>
           <Notifications />
           <Switch>
             <ScrollToTopRoute exact path="/" component={LandingPage} />
@@ -30,7 +30,7 @@ const LandingApp = props => {
 
 const App = props => {
   return (
-    <div>
+    <div id='wrapper'>
       <Nav />
       <section id='inner-wrapper' className='section'>
         <div className='container'>

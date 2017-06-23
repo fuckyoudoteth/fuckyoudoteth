@@ -12,11 +12,13 @@ import {
 
 import Identicon from '../Identicon'
 
-const initialBid = {
-  bidder: web3.eth.defaultAccount,
-  amount: 0,
-  donationAddress: web3.eth.defaultAccount,
-  message: '',
+const initialBid = () => {
+  return {
+    bidder: web3.eth.defaultAccount,
+    amount: '',
+    donationAddress: web3.eth.defaultAccount,
+    message: '',
+  }
 }
 
 class BidForm extends React.Component {
@@ -30,7 +32,7 @@ class BidForm extends React.Component {
         message: props.pendingBid.message,
       }
     } else {
-      this.state = initialBid
+      this.state = initialBid()
     }
   }
 
@@ -43,7 +45,7 @@ class BidForm extends React.Component {
         message: nextProps.pendingBid.message,
       })
     } else if(!nextProps.pendingBid && this.props.pendingBid) {
-      this.setState(initialBid)
+      this.setState(initialBid())
     }
   }
 
@@ -56,7 +58,7 @@ class BidForm extends React.Component {
   }
 
   validBid() {
-    return !Number.isNaN(parseFloat(this.state.amount))
+    return !Number.isNaN(Number(this.state.amount))
   }
 
   higherBid(amount) {
@@ -68,7 +70,9 @@ class BidForm extends React.Component {
   }
 
   bidHelp() {
-    if(!this.validBid()) {
+    if(this.state.amount === '') {
+      return <p className='help'>Bid in ETH</p>
+    } else if(!this.validBid()) {
       return <p className='help is-danger'>Bid must be a number</p>
     } else if(!this.higherBid(this.state.amount)) {
       return <p className='help is-danger'>Bid higher than the current highest amount required</p>
@@ -111,7 +115,7 @@ class BidForm extends React.Component {
   }
 
   render() {
-    const bidStateClass = this.validBid() && this.higherBid(this.state.amount) ?
+    const bidStateClass = this.validBid() && this.higherBid(this.state.amount) || this.state.amount === '' ?
         '' : 'is-danger'
     const donationAddressIcon = this.validDonationAddress() ?
       <div className='control'>
@@ -207,17 +211,8 @@ class BidForm extends React.Component {
   }
 }
 
-const BidFormWrapper = props => {
-  if(props.eth.connected) {
-    return <BidForm {...props} />
-  } else {
-    return <div />
-  }
-}
-
 const mapStateToProps = state => {
   return {
-    eth: getEth(state),
     auctionEnded: getCurrentAuctionEnded(state),
     currentAuction: getCurrentAuctionBid(state),
     pendingBid: getPendingBid(state),
@@ -230,4 +225,4 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(BidFormWrapper)
+export default connect(mapStateToProps, mapDispatchToProps)(BidForm)
