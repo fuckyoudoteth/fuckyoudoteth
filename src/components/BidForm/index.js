@@ -12,6 +12,13 @@ import {
 
 import Identicon from '../Identicon'
 
+const initialBid = {
+  bidder: web3.eth.defaultAccount,
+  amount: 0,
+  donationAddress: web3.eth.defaultAccount,
+  message: '',
+}
+
 class BidForm extends React.Component {
   constructor(props) {
     super(props)
@@ -23,12 +30,7 @@ class BidForm extends React.Component {
         message: props.pendingBid.message,
       }
     } else {
-      this.state = {
-        bidder: web3.eth.defaultAccount,
-        amount: 0,
-        donationAddress: web3.eth.defaultAccount,
-        message: '',
-      }
+      this.state = initialBid
     }
   }
 
@@ -40,6 +42,8 @@ class BidForm extends React.Component {
         donationAddress: nextProps.pendingBid.donationAddress,
         message: nextProps.pendingBid.message,
       })
+    } else if(!nextProps.pendingBid && this.props.pendingBid) {
+      this.setState(initialBid)
     }
   }
 
@@ -119,6 +123,7 @@ class BidForm extends React.Component {
     const bidButtonText = !this.props.pendingBid ?
       this.props.auctionEnded ?
         'Start New Auction & Bid!' : 'Bid Now!' : 'Bidding...'
+    const pending = !!this.props.pendingBid
     return (
       <div className='field'>
 
@@ -131,7 +136,9 @@ class BidForm extends React.Component {
               </div>
               <p className='control is-expanded'>
                 <span className='select'>
-                  <select value={this.state.bidder} onChange={this.setBidder.bind(this)}>
+                  <select disabled={pending}
+                          value={this.state.bidder}
+                          onChange={this.setBidder.bind(this)}>
                     { web3.eth.accounts.map(a => <option key={a}>{a}</option>) }
                   </select>
                 </span>
@@ -144,6 +151,7 @@ class BidForm extends React.Component {
           <label className='label'>Bid Amount</label>
           <p className='control'>
             <input className={`input ${bidStateClass}`}
+                   disabled={pending}
                    type='text'
                    placeholder='Bid in ETH'
                    value={this.state.amount}
@@ -161,6 +169,7 @@ class BidForm extends React.Component {
           </label>
           <p className='control'>
             <textarea className='textarea'
+                      disabled={pending}
                       placeholder='Type your message here'
                       value={ this.state.message }
                       onChange={this.setMessage.bind(this)} />
@@ -173,6 +182,7 @@ class BidForm extends React.Component {
             { donationAddressIcon }
             <p className='control is-expanded'>
               <input className={`input ${donationAddressStateClass}`}
+                     disabled={pending}
                      type='text'
                      placeholder='Optional Donation Address'
                      value={this.state.donationAddress}

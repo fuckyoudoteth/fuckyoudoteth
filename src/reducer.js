@@ -96,7 +96,6 @@ export default function reducer(state=initialState, action) {
   case END_AUCTION:
     return {
       ...state,
-      pendingReset: null,
       currentAuctionStatus: {
         ...state.currentAuctionStatus,
         number: action.auctionNumber + 1,
@@ -121,7 +120,6 @@ export default function reducer(state=initialState, action) {
   case HIGHEST_BID_INCREASED:
     return {
       ...state,
-      pendingBid: null,
       auctions: {
         ...state.auctions,
         [action.auctionNumber] : {
@@ -143,6 +141,7 @@ export default function reducer(state=initialState, action) {
         action.donationAddress,
         action.message),
     }
+  case SEND_BID_SUCCESS:
   case SEND_BID_FAILURE:
     return {
       ...state,
@@ -153,6 +152,7 @@ export default function reducer(state=initialState, action) {
       ...state,
       pendingReset: true,
     }
+  case RESET_AUCTION_SUCCESS:
   case RESET_AUCTION_FAILURE:
     return {
       ...state,

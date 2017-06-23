@@ -70,11 +70,12 @@ export function setWithdrawals(withdrawals, pendingWithdrawals) {
   }
 }
 
-export function endAuction(auctionNumber, auctionEndTime, bidder, amount, donationAddress, message) {
+export function endAuction(auctionNumber, auctionEndTime, currentBlock, bidder, amount, donationAddress, message) {
   return {
     type: END_AUCTION,
     auctionNumber,
     auctionEndTime,
+    currentBlock,
     bidder,
     amount,
     donationAddress,
@@ -82,10 +83,11 @@ export function endAuction(auctionNumber, auctionEndTime, bidder, amount, donati
   }
 }
 
-export function highestBidIncreased(auctionNumber, bidder, amount, donationAddress, message) {
+export function highestBidIncreased(auctionNumber, currentBlock, bidder, amount, donationAddress, message) {
   return {
     type: HIGHEST_BID_INCREASED,
     auctionNumber,
+    currentBlock,
     bidder,
     amount,
     donationAddress,

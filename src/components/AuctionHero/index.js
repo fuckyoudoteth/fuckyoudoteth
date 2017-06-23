@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
+import { donate } from '../../actions'
 import { getAuctionBid } from '../../selectors'
 
 import Nav from '../Nav'
@@ -51,7 +52,8 @@ const Auction = props => {
           </div>
           {
             props.donationAddress != '0x0000000000000000000000000000000000000000' ?
-              <div className='level-item'>
+              <div className='level-item is-link'
+                   onClick={() => props.donate(props.donationAddress)}>
                 <div className='has-text-centered'>
                   <div className='heading'>Donate to</div>
                   <div className='title'>
@@ -71,4 +73,10 @@ const mapStateToProps = (state, ownProps) => {
   return getAuctionBid(state, ownProps)
 }
 
-export default connect(mapStateToProps)(Auction)
+const mapDispatchToProps = dispatch => {
+  return {
+    donate: address => dispatch(donate(address))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Auction)

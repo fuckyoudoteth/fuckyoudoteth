@@ -5,12 +5,12 @@ import { Link } from 'react-router-dom'
 const CallToAuction = props => {
   return (
     <section className='section'>
-      <div className='level is-centered'>
+      <div className='level is-centered is-vertical'>
         <div className='level-item has-text-centered'>
-          <p className='title is-4'>Join the next auction</p>
+          <p className='title'>Join the next auction!</p>
         </div>
         <div className='level-item has-text-centered'>
-        <Link className='button is-success'
+        <Link className='button is-success is-large'
               to='/bid'>Bid Now</Link>
         </div>
       </div>

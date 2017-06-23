@@ -1,6 +1,5 @@
 import { delay, takeEvery, takeLatest, throttle } from 'redux-saga'
-import { call, put, take, race, select, fork, cancel, cancelled } from 'redux-saga/effects'
-import promisify from 'es6-promisify'
+import { call, cps, put, take, race, select, fork, cancel, cancelled } from 'redux-saga/effects'
 
 import { LOCATION_CHANGE } from 'react-router-redux'
 import Notifications from 'react-notification-system-redux'
@@ -26,7 +25,16 @@ import {
   WITHDRAW,
   withdrawSuccess,
   withdrawFailure,
+  DONATE,
+  donateSuccess,
+  donateFailure,
  } from './actions'
+
+ import {
+   getPendingBid,
+   getPendingReset,
+ } from './selectors'
+
  import {
    hexStringsToString,
    stringToHexStrings,
@@ -69,7 +77,7 @@ function initEth() {
 
 function* checkEthNetwork() {
   try {
-    const resp = yield promisify(web3.eth.getBlock, web3.eth)(0)
+    const resp = yield cps([web3.eth, web3.eth.getBlock], 0)
     switch(resp.hash) {
       case '0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d':
         return 'ropsten'
@@ -117,43 +125,62 @@ function* watchAuction(config) {
   yield takeEvery(SEND_BID, sendBid, auction)
   yield takeEvery(RESET_AUCTION, resetAuction, auction)
   yield takeEvery(WITHDRAW, withdraw, auction)
+  yield takeEvery(DONATE, donate)
   // other side effects
+  yield takeEvery(HIGHEST_BID_INCREASED, updatePendingBid, auction)
+  yield takeEvery(END_AUCTION, updateEndAuction, auction)
   yield takeEvery([END_AUCTION, HIGHEST_BID_INCREASED, WITHDRAWAL], updateWithdrawals, auction)
-  yield takeEvery(END_AUCTION, updateAuctionEnded, auction)
+  yield takeEvery(END_AUCTION, updateAuctionTimeRemaining, auction)
   // notifications
   yield takeEvery(END_AUCTION, alertEndAuction, auction)
   yield takeEvery(HIGHEST_BID_INCREASED, alertHighestBidIncreased, auction)
   yield takeEvery(WITHDRAWAL, alertWithdrawal, auction)
   // set up / watch auction
   yield setAuctionBiddingTime(auction)
-  yield fork(watchAuctionEnded, auction)
+  yield fork(watchAuctionTimeRemaining, auction)
   yield fork(watchAuctionEvents, auction)
 }
 
 function* sendBid(auction, action) {
   const [msg0, msg1, msg2, msg3] = yield stringToHexStrings(action.message)
   try {
-    const amount = yield promisify(auction.bid, auction)(
+    const amount = yield cps([auction, auction.bid],
       action.donationAddress,
       msg0, msg1, msg2, msg3,
       {from: action.bidder, value: web3.toWei(action.amount, 'ether')})
-    yield put(sendBidSuccess())
   } catch(e) {
     yield put(sendBidFailure(e))
   }
 }
 
+function* updatePendingBid(auction, action) {
+  const pendingBid = yield select(getPendingBid)
+  if(pendingBid) {
+    if(web3.eth.accounts.find(a => a === action.bidder)) {
+      yield put(sendBidSuccess())
+    } else if(pendingBid.amount < action.amount) {
+      yield put(sendBidFailure(new Error('outbid before network confirmation')))
+    }
+  }
+}
+
 function* resetAuction(auction) {
   try {
-    yield promisify(auction.resetAuction, auction)()
-    yield put(resetAuctionSuccess())
+    yield cps([auction, auction.resetAuction])
   } catch(e) {
-    yield put(resetAuctionFailure())
+    yield put(resetAuctionFailure(e))
+  }
+}
+
+function* updateEndAuction(auction) {
+  const pendingReset = yield select(getPendingReset)
+  if(pendingReset) {
+    yield put(resetAuctionSuccess())
   }
 }
 
 function* withdraw(auction, action) {
-  const success = yield promisify(auction.withdraw, auction)(
+  const success = yield cps([auction, auction.withdraw],
     action.address, {from: action.address})
   if(!success) {
     yield put(withdrawFailure(action.address))
@@ -164,7 +191,7 @@ function* updateWithdrawals(auction) {
   const accounts = yield web3.eth.accounts
   var withdrawals = {}
   for(const account of accounts) {
-      var balance = yield promisify(auction.pendingReturns, auction)(account)
+      var balance = yield cps([ auction, auction.pendingReturns], account)
       balance = yield web3.fromWei(balance.toNumber(), 'ether')
       if(balance != 0) {
         withdrawals[account] = balance
@@ -179,13 +206,27 @@ function* updateWithdrawals(auction) {
   yield put(setWithdrawals(withdrawals, pendingWithdrawals))
 }
 
+function* donate(action) {
+  try {
+    const success = yield cps([web3.eth, web3.eth.sendTransaction],
+      {to: action.address})
+    yield put(donateSuccess(action.address))
+  } catch(e) {
+    yield put(donateFailure(action.address))
+  }
+}
+
 // notifications
 
+function* recentBlock(block) {
+  const currentBlock = yield cps([web3.eth, web3.eth.getBlock], 'latest')
+  return currentBlock.number - block <= 6
+}
+
 function* alertEndAuction(auction, action) {
-  const auctionNumber = yield action.auctionNumber
-  var auctionEndBlock = yield promisify(auction.history, auction)(auctionNumber)
-  var currentBlock = yield promisify(web3.eth.getBlock, web3.eth)('latest')
-  if(currentBlock.number - auctionEndBlock.toNumber() <= 1) {
+  const recent = yield recentBlock(action.currentBlock)
+  if(recent) {
+    const auctionNumber = action.auctionNumber
     const endedNotification = {
       message: `Auction #${auctionNumber} Ended`,
       position: 'tr',
@@ -195,30 +236,36 @@ function* alertEndAuction(auction, action) {
 }
 
 function* alertHighestBidIncreased(auction, action) {
-  const auctionNumber = yield action.auctionNumber
-  var auctionEndBlock = yield promisify(auction.history, auction)(auctionNumber)
-  var currentBlock = yield promisify(web3.eth.getBlock, web3.eth)('latest')
-  if(currentBlock.number - auctionEndBlock.toNumber() <= 1) {
-  //if(!web3.eth.accounts.find(action.bidder)) {
-    const bidNotification = {
-      message: `New Bid: ${action.amount} ETH`,
-      position: 'tr',
+  const recent = yield recentBlock(action.currentBlock)
+  if(recent) {
+    var message, notify
+    if(web3.eth.accounts.find(a => a === action.bidder)) {
+      message = `Bid Successful: ${action.amount} ETH`
+      notify = Notifications.success
+    } else {
+      message = `New Bid: ${action.amount} ETH`
+      notify = Notifications.info
     }
-    yield put(Notifications.info(bidNotification))
-  //}
+    yield put(notify({
+      message,
+      position: 'tr',
+    }))
   }
 }
 
 function* alertWithdrawal(auction, action) {
-  const withdrawalNotification = {
-    message: `Successful Withdrawal: ${action.amount} ETH`,
-    position: 'tr',
+  const recent = yield recentBlock(action.currentBlock)
+  if(recent) {
+    const withdrawalNotification = {
+      message: `Successful Withdrawal: ${action.amount} ETH`,
+      position: 'tr',
+    }
+    yield put(Notifications.info(withdrawalNotification))
   }
-  yield put(Notifications.info(withdrawalNotification))
 }
 
 function* setAuctionBiddingTime(auction) {
-  var biddingTime = yield promisify(auction.biddingTime, auction)()
+  var biddingTime = yield cps([auction, auction.biddingTime])
   biddingTime = yield biddingTime.toNumber()
   yield put(setBiddingTime(biddingTime))
 }
@@ -228,6 +275,7 @@ function* setAuctionBiddingTime(auction) {
 function processAuctionEndedEvent(event) {
   const auctionNumber = event.args.auctionNumber.toNumber()
   const auctionEndTime = new Date(event.args.auctionEndTime.toNumber() * 1000)
+  const currentBlock = event.blockNumber
   const winner = event.args.bidder
   const amount = web3.fromWei(event.args.amount.toNumber(), 'ether')
   const donationAddress = event.args.donationAddress
@@ -237,11 +285,12 @@ function processAuctionEndedEvent(event) {
     event.args.msg2,
     event.args.msg3,
   )
-  store.dispatch(endAuction(auctionNumber, auctionEndTime, winner, amount, donationAddress, message))
+  store.dispatch(endAuction(auctionNumber, auctionEndTime, currentBlock, winner, amount, donationAddress, message))
 }
 
 function processHighestBidIncreasedEvent(event) {
   const auctionNumber = event.args.auctionNumber.toNumber()
+  const currentBlock = event.blockNumber
   const winner = event.args.bidder
   const amount = web3.fromWei(event.args.amount.toNumber(), 'ether')
   const donationAddress = event.args.donationAddress
@@ -251,7 +300,7 @@ function processHighestBidIncreasedEvent(event) {
     event.args.msg2,
     event.args.msg3,
   )
-  store.dispatch(highestBidIncreased(auctionNumber, winner, amount, donationAddress, message))
+  store.dispatch(highestBidIncreased(auctionNumber, currentBlock, winner, amount, donationAddress, message))
 }
 
 function processWithdrawal(event) {
@@ -261,16 +310,17 @@ function processWithdrawal(event) {
 }
 
 function* watchAuctionEvents(auction) {
-  var toBlock = yield promisify(web3.eth.getBlock, web3.eth)('latest')
+  var toBlock = yield cps([web3.eth, web3.eth.getBlock], 'latest')
   toBlock = yield toBlock.number
   toBlock += 100000
-  var fromBlock = yield promisify(auction.auctionStartBlock, auction)()
+  var fromBlock = yield cps([auction, auction.auctionStartBlock])
   fromBlock = yield fromBlock.toNumber()
   auction.AuctionEnded({}, {fromBlock, toBlock}, function(error, result) {
     if(!error) {
       processAuctionEndedEvent(result)
     }
   })
+  yield take(END_AUCTION)
   auction.HighestBidIncreased({}, {fromBlock, toBlock}, function(error, result) {
     if(!error) {
       processHighestBidIncreasedEvent(result)
@@ -283,18 +333,18 @@ function* watchAuctionEvents(auction) {
   })
 }
 
-function* updateAuctionEnded(auction) {
-  const auctionEnded = yield promisify(auction.auctionOver, auction)()
-  const auctionEndTime = yield promisify(auction.auctionEndTime, auction)()
+function* updateAuctionTimeRemaining(auction) {
+  const auctionEnded = yield cps([auction, auction.auctionOver])
+  const auctionEndTime = yield cps([auction, auction.auctionEndTime])
   const auctionEndDate = yield new Date(auctionEndTime.toNumber() * 1000)
   const timeRemaining = yield auctionTimeRemaining(auctionEndDate)
   const timeRemainingSeconds = yield auctionTimeRemainingSeconds(auctionEndDate)
   yield put(setAuctionTimeRemaining(auctionEnded, auctionEndDate, timeRemaining, timeRemainingSeconds))
 }
 
-function* watchAuctionEnded(auction) {
+function* watchAuctionTimeRemaining(auction) {
   while(true) {
-    yield updateAuctionEnded(auction)
+    yield updateAuctionTimeRemaining(auction)
     yield delay(1500)
   }
 }

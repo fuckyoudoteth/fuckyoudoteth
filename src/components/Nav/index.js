@@ -9,7 +9,7 @@ const Nav = props => {
         <Link className='nav-item'
               to='/'>
           <strong className='content'>
-            FY.eth
+            FU.eth
           </strong>
         </Link>
       </div>
