@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "NODE_ENV=production webpack -p",
+    "build": "rm dist/* && NODE_ENV=production webpack -p",
     "watch": "webpack -w",
     "watch-server": "webpack-dev-server --color --hot",
     "update-constants": "node scripts/update_constants.js",

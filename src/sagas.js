@@ -76,7 +76,7 @@ function* initEth() {
     }
   }
   if(typeof window.web3 !== 'undefined') {
-    window.web3 = new Web3(web3.currentProvider)
+    window.web3 = new Web3(window.web3.currentProvider)
     // quick connection check
     // required for injected web3 that thinks its connected
     try {
@@ -135,8 +135,8 @@ function* watchEthConnection() {
 // Auction sagas
 
 function* watchAuction(config) {
-  var auction = yield web3.eth.contract(config.abi).at(config.address)
   yield take(SET_ETH_CONNECTION)
+  var auction = yield web3.eth.contract(config.abi).at(config.address)
   const isRW = yield select(getEthRWStatus)
   if(isRW) {
     yield watchAuctionRW(auction)
