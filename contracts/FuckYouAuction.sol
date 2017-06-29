@@ -68,10 +68,8 @@ contract FuckYouAuction is owned {
     /// beneficiary address `_beneficiary`.
     /// This contract is designed for fuckyou.eth
     function FuckYouAuction(
-        uint _biddingTime,
-        address _beneficiary
+        uint _biddingTime
     ) {
-        beneficiary = _beneficiary;
         biddingTime = _biddingTime;
         incrementAuctionState();
     }
@@ -184,7 +182,7 @@ contract FuckYouAuction is owned {
     }
 
     /// Withdraw a bid that was overbid.
-    function normalWithdraw() internal returns (bool) {
+    function withdraw() returns (bool) {
         var amount = pendingReturns[msg.sender];
         if (amount > 0) {
             // It is important to set this to zero because the recipient
@@ -203,29 +201,21 @@ contract FuckYouAuction is owned {
     }
 
     /// Withdraw benecifiary stash
-    function beneficiaryWithdraw() internal returns (bool) {
-        require(msg.sender == beneficiary);
+    function beneficiaryWithdraw() returns (bool) {
         var amount = beneficiaryTotal;
         if (amount > 0) {
             beneficiaryTotal = 0;
-            if(!msg.sender.send(amount)) {
+            if(!beneficiary.send(amount)) {
                 beneficiaryTotal = amount;
                 return false;
             }
-            Withdrawal(msg.sender, amount);
+            Withdrawal(beneficiary, amount);
         }
         return true;
     }
 
-    function withdraw() returns (bool) {
-      if(msg.sender == beneficiary) {
-        return beneficiaryWithdraw();
-      } else {
-        return normalWithdraw();
-      }
-    }
-
     function setBeneficiary(address _beneficiary) onlyOwner {
+        require(beneficiary==0x0);
         beneficiary = _beneficiary;
     }
 

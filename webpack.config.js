@@ -7,7 +7,8 @@ module.exports = {
     main: './src/index.js',
   },
   output: {
-    filename: '[name].[chunkhash].js',
+    filename: process.env.NODE_ENV === 'production' ?
+      '[name].[chunkhash].js' : '[name].[hash].js',
     path: path.join(__dirname, 'dist')
   },
   module: {

@@ -13,7 +13,7 @@ const BidPage = props => {
     <div>
       <div className='columns'>
         <div className='column'>
-          <div className='title'>Next Auction Status</div>
+          <div className='title'>Current Highest Bid</div>
           <CurrentAuctionStatus />
         </div>
         {
