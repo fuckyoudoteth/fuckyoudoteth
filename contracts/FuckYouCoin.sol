@@ -19,7 +19,8 @@ contract FuckYouCoin is SafeMath, ERC20 {
 
   mapping(address=>Account) accounts;
   mapping (address => mapping (address => uint256)) allowed;
-  uint totalSupply;
+  uint public totalSupply;
+  uint crowdfundBalance;
   uint totalDividendPoints;
   uint unclaimedDividends;
   uint lastDispersalBalance;
@@ -38,8 +39,8 @@ contract FuckYouCoin is SafeMath, ERC20 {
 
   // Crowdsale information
   bool public finalizedCrowdfunding = false;
-  uint256 public fundingStartBlock; // crowdsale start block
-  uint256 public fundingEndBlock; // crowdsale end block
+  uint256 public fundingStartBlock; // crowdfund start block
+  uint256 public fundingEndBlock; // crowdfund end block
   uint256 public constant maxTokensPerEther = 1200; // max FUC:ETH exchange rate
   uint256 public constant crowdfundMaxEther = 10000 ether;
   uint256 public constant numberOfFundingDays = 30;
@@ -137,15 +138,24 @@ contract FuckYouCoin is SafeMath, ERC20 {
       require(finalizedCrowdfunding);
   }
 
-  function tokensPerEther() returns (uint) {
+  // (cutoffBlock - currentBlock) / blocksPerDay
+  function daysIntoCutoff() constant returns (uint) {
     // block after which tokens per eth drops
     var cutoffBlock = safeAdd(safeMul(blocksPerDay, daysOfMaxTokensPerEther), fundingStartBlock);
     if(block.number < cutoffBlock) {
+      return 0;
+    } else {
+      return safeDiv(safeSub(cutoffBlock, block.number), blocksPerDay);
+    }
+  }
+
+  function tokensPerEther() constant returns (uint) {
+    var daysIntoDecrease = daysIntoCutoff();
+    if(daysIntoDecrease == 0) {
       return maxTokensPerEther;
     } else {
       // total loss = dailyLoss * (cutoffBlock - currentBlock) / blocksPerDay
-      var loss = safeMul(dailyLossTokensPerEther,
-          safeDiv(safeSub(cutoffBlock, block.number), blocksPerDay));
+      var loss = safeMul(dailyLossTokensPerEther, daysIntoDecrease);
       return safeSub(maxTokensPerEther, loss);
     }
   }
@@ -163,13 +173,16 @@ contract FuckYouCoin is SafeMath, ERC20 {
       require(msg.value != 0);
 
       // multiply by exchange rate to get newly created token amount
-      uint256 createdTokens = safeMul(msg.value, tokensPerEther());
+      var createdTokens = safeMul(msg.value, tokensPerEther());
 
       // we are creating tokens, so increase the totalSupply
       totalSupply = safeAdd(totalSupply, createdTokens);
 
       // don't go over the limit!
       require(this.balance <= crowdfundMaxEther);
+
+      // set crowdfund balance
+      crowdfundBalance = this.balance;
 
       // Assign new tokens to the sender
       accounts[msg.sender].balance = safeAdd(accounts[msg.sender].balance, createdTokens);
@@ -188,11 +201,12 @@ contract FuckYouCoin is SafeMath, ERC20 {
       require(getState() == State.Funded); // don't finalize unless funded
       require(!finalizedCrowdfunding); // can't finalize twice
 
-      // prevent more creation of tokens
+      // prevent creation of more tokens
       finalizedCrowdfunding = true;
 
       // Developer FUC Endowment
-      uint256 devTokens = safeDiv(safeMul(totalSupply, devPercentOfTotal), crowdfundPercentOfTotal);
+      uint devTokens = safeSub(safeDiv(safeMul(totalSupply, hundredPercent), crowdfundPercentOfTotal), totalSupply);
+      //uint256 devTokens = safeDiv(safeMul(totalSupply, devPercentOfTotal), crowdfundPercentOfTotal);
       accounts[fuMultisig].balance = safeAdd(balanceOf(fuMultisig), devTokens);
       Transfer(0, fuMultisig, devTokens);
 
@@ -205,11 +219,12 @@ contract FuckYouCoin is SafeMath, ERC20 {
   /// @notice This manages the crowdfunding state machine
   /// We make it a function and do not assign the result to a variable
   /// So there is no chance of the variable being stale
-  function getState() public constant returns (State){
+  function getState() public constant returns (State) {
        // once we reach success, lock in the state
        if (finalizedCrowdfunding) return State.Funded;
        if (block.number < fundingStartBlock) return State.PreFunding;
-       else if (block.number <= fundingEndBlock && this.balance < crowdfundMaxEther) return State.Funding;
+       else if (block.number <= fundingEndBlock &&
+         crowdfundBalance < crowdfundMaxEther) return State.Funding;
        else return State.Funded;
  }
 
@@ -223,8 +238,8 @@ contract FuckYouCoin is SafeMath, ERC20 {
   modifier updateDividendBalance(address account) {
     var owing = dividendsOwing(account);
     if(owing > 0) {
-      unclaimedDividends -= owing;
-      accounts[account].dividendBalance += owing;
+      unclaimedDividends = safeSub(unclaimedDividends, owing);
+      accounts[account].dividendBalance = safeAdd(accounts[account].dividendBalance, owing);
       accounts[account].lastDividendPoints = totalDividendPoints;
     }
     _;

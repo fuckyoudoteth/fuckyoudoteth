@@ -4,7 +4,9 @@ var path = require('path')
 var jsonfile = require('jsonfile')
 
 var contracts = [
-  'FuckYouAuction'
+  'FuckYouAuction',
+  'FuckYouCoin',
+  'MultiSigWallet',
 ]
 
 contractDir = 'build/contracts'

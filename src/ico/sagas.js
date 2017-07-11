@@ -4,12 +4,15 @@ import { call, cps, put, take, race, select, fork, cancel, cancelled } from 'red
 import {
   SET_CURRENT_BLOCK,
   setCurrentBlock,
+  setIcoState,
 
   BUY,
   buySuccess,
   buyFailure,
 
   transfer,
+
+  crowdfundMaxEther,
 } from './actions'
 
 import {
@@ -28,19 +31,15 @@ export default function* rootSaga(config, theStore) {
   var coin = yield web3.eth.contract(config.abi).at(config.address)
   const isRW = yield select(getEthRWStatus)
   yield fork(watchCurrentBlock)
+  yield fork(watchIcoState)
   if(isRW) {
     yield icoRW(coin)
-  } else {
-    yield icoRO(coin)
   }
 }
 
 function* icoRW(coin) {
   yield takeEvery(BUY, buy, coin)
   yield fork(watchFUCEvents, coin)
-}
-
-function* icoRO(coin) {
 }
 
 function* buy(coin, action) {
@@ -68,7 +67,7 @@ function* watchFUCEvents(coin) {
   })
 }
 
-function* watchCurrentBlock(auction) {
+function* watchCurrentBlock() {
   while(true) {
     var currentBlock = yield cps([web3.eth, web3.eth.getBlock], 'latest')
     currentBlock = currentBlock.number
@@ -77,5 +76,35 @@ function* watchCurrentBlock(auction) {
       yield put(setCurrentBlock(currentBlock))
     }
     yield delay(7000)
+  }
+}
+
+function parseIcoState(numState) {
+  if(numState == 0) {
+    return ICO_PREFUNDING
+  } else if(numState == 1) {
+    return ICO_FUNDING
+  } else {
+    return ICO_FUNDED
+  }
+}
+
+function* watchIcoState(coin) {
+  while(true) {
+    yield take(SET_CURRENT_BLOCK)
+    const startBlock = yield cps([coin, coin.fundingStartBlock])
+    const endBlock = yield cps([coin, coin.fundingEndBlock])
+    const fundedWei = yield cps([web3.eth, web3.eth.getBalance], coin.address)
+    const tokensPerEth = yield cps([coin, coin.tokensPerEth])
+    const icoNumState = yield cps([coin, coin.getState])
+    const availableEth = crowdfundMaxEther - web3.fromWei(fundedWei, 'ether')
+    const icoState = yield call(parseIcoState, icoNumState)
+    yield put(setIcoState(
+      startBlock.toNumber(),
+      endBlock.toNumber(),
+      availableEth,
+      tokensPerEth,
+      icoState
+    ))
   }
 }
