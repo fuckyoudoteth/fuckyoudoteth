@@ -43,3 +43,12 @@ body, #app {
 .is-extra-large {
     font-size: 2.5rem;
 }
+
+.eth-label {
+  position: absolute;
+  right: 20px;
+  color: #888;
+  bottom: 0.9em;
+  font-size: 28px;
+  z-index: 10;
+}

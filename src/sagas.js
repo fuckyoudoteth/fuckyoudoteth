@@ -49,15 +49,16 @@ var store
 
 export default function* rootSaga(config, theStore) {
   store = theStore
+  console.log(config)
   yield fork(watchAuction, config.contracts.FuckYouAuction)
-  yield startEthConnection()
+  yield startEthConnection(config.network)
   yield fork(watchEthConnection)
 }
 
 // Eth sagas
 
-function* startEthConnection() {
-  const node = yield initEth()
+function* startEthConnection(networkConfig) {
+  const node = yield initEth(networkConfig)
   const connected = yield checkEthConnection()
   const network = yield checkEthNetwork()
   yield delay(170)
@@ -65,10 +66,14 @@ function* startEthConnection() {
 }
 
 const infuraUrl = 'https://mainnet.infura.io/9A2BCvScLiNdmOTuDiGg'
+const developmentUrl = 'http://localhost:18545'
 
-function* initEth() {
+function* initEth(network) {
   const setFallbackWeb3 = (W3, connected) => {
-    if(!connected) {
+    if(network === 'development') {
+      window.web3 = new Web3(new Web3.providers.HttpProvider(developmentUrl))
+      return true
+    } else if(!connected) {
       window.web3 = new Web3(new Web3.providers.HttpProvider(infuraUrl))
       return false
     } else {
@@ -137,6 +142,7 @@ function* watchEthConnection() {
 function* watchAuction(config) {
   yield take(SET_ETH_CONNECTION)
   var auction = yield web3.eth.contract(config.abi).at(config.address)
+  console.log('auction',auction)
   const isRW = yield select(getEthRWStatus)
   if(isRW) {
     yield watchAuctionRW(auction)
@@ -221,7 +227,7 @@ function* sendBid(auction, action) {
     const amount = yield cps([auction, auction.bid],
       action.donationAddress,
       msg0, msg1, msg2, msg3,
-      {from: action.bidder, value: web3.toWei(action.amount, 'ether')})
+      {from: action.bidder, value: web3.toWei(action.amount, 'ether'), gas:1000000})
   } catch(e) {
     yield put(sendBidFailure(e))
   }
@@ -240,7 +246,8 @@ function* updatePendingBid(auction, action) {
 
 function* resetAuction(auction) {
   try {
-    yield cps([auction, auction.resetAuction])
+    yield cps([auction, auction.resetAuction],
+    {from: web3.eth.accounts[0], gas: 1000000})
   } catch(e) {
     yield put(resetAuctionFailure(e))
   }

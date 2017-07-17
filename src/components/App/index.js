@@ -11,6 +11,7 @@ import LandingPage from '../LandingPage'
 import HomePage from '../HomePage'
 import AboutPage from '../AboutPage'
 import BidPage from '../BidPage'
+import IcoPage from '../../ico/components/IcoPage'
 
 const LandingApp = props => {
   return (
@@ -36,6 +37,7 @@ const App = props => {
         <div className='container'>
           <Route exact path="/about" component={AboutPage} />
           <Route exact path="/bid" component={BidPage} />
+          <Route exact path="/ico" component={IcoPage} />
         </div>
       </section>
       <Footer />

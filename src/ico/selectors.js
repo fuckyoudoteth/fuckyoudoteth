@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect'
 import {
-  PREFUNDING,
-  FUNDING,
-  FUNDED,
+  ICO_PREFUNDING,
+  ICO_FUNDING,
+  ICO_FUNDED,
 
   blocksPerDay,
   daysOfMaxTokensPerEther,
@@ -33,7 +33,7 @@ export const getBlocksUntilIco = createSelector(
 )
 
 export const getBlocksIntoIco = createSelector(
-  [getBlocksUntilIco]
+  [getBlocksUntilIco],
   blocksUntilIco => blocksUntilIco * -1
 )
 
@@ -44,7 +44,8 @@ export const isNextChangeIcoEnd = createSelector(
 
 export const getBlocksUntilNextChange = createSelector(
   [getIcoState, getCurrentBlock, getIcoStartBlock],
-  (icoState, currentBlock, startBlock) => switch(icoState) {
+  (icoState, currentBlock, startBlock) => {
+    switch(icoState) {
     case ICO_PREFUNDING:
       return startBlock - currentBlock
     case ICO_FUNDING:
@@ -56,5 +57,6 @@ export const getBlocksUntilNextChange = createSelector(
       }
     case ICO_FUNDED:
       return 0
+    }
   }
 )

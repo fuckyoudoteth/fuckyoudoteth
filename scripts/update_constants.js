@@ -31,6 +31,7 @@ contracts.forEach(function(contractName) {
 })
 
 var constants = {
+  network: jsonfile.readFileSync(path.join(constantsDir, 'network.json')),
   contracts: {}
 }
 contracts.forEach(function(contractName) {

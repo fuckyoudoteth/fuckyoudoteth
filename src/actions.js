@@ -138,9 +138,10 @@ export function resetAuctionSuccess() {
   }
 }
 
-export function resetAuctionFailure() {
+export function resetAuctionFailure(error) {
   return {
     type: RESET_AUCTION_FAILURE,
+    error,
   }
 }
 

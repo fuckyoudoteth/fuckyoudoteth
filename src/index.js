@@ -21,6 +21,10 @@ import constants from '../constants'
 
 import reducer from './reducer'
 import sagas from './sagas'
+
+import icoReducer from './ico/reducer'
+import icoSagas from './ico/sagas'
+
 import { SET_AUCTION_TIME_REMAINING } from './actions'
 
 import App from './components/App'
@@ -44,6 +48,7 @@ if(process.env.NODE_ENV !== "production") {
 
 let store = createStore(combineReducers({
   site: reducer,
+  ico: icoReducer,
   router: routerReducer,
   notifications,
 }), //compose(
@@ -54,6 +59,7 @@ let store = createStore(combineReducers({
 document.onreadystatechange = () => {
   if (document.readyState === 'complete') {
     sagaMiddleware.run(sagas, constants, store)
+    sagaMiddleware.run(icoSagas, constants, store)
   }
 }
 

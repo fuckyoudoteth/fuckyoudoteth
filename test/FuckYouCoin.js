@@ -255,6 +255,21 @@ contract('Crowdsale', function(accounts){
       }
     }).then(done).catch(done);
   });
+  it(prefix + 'properly calculates FUC reward', function(done) {
+    MultiSigWallet.new(accounts, 3).then(function(wallet){
+      startBlock = web3.eth.blockNumber + 2;
+      return FuckYouCoin.new(wallet.address, startBlock);
+    }).then(function(token){
+      utils.mineToBlockHeight(startBlock);
+      return token.crowdfundMaxEther().then(function(ethMax){
+        let maxWeiForSuccess = ethMax;
+        return token.create({ from: accounts[0], value: maxWeiForSuccess });
+      }).then(function(){
+        // success
+        utils.mineOneBlock();
+      });
+    }).then(done).catch(done);
+  });
   // // // // ---------------------------------------------
   // // // // ------------- SUCCESSFUL CROWDSALE ----------
   // // // // ---------------------------------------------
@@ -291,8 +306,8 @@ contract('Crowdsale', function(accounts){
       utils.mineToBlockHeight(startBlock);
       return token.crowdfundMaxEther().then(function(ethMax){
         return ethMax;
-      }).then(function(minWeiForSuccess){
-        return token.create({ from: accounts[0], value: minWeiForSuccess.toNumber() });
+      }).then(function(maxWeiForSuccess){
+        return token.create({ from: accounts[0], value: maxWeiForSuccess.toNumber() });
       }).then(function(){
         utils.mineToBlockHeight(endBlock);
         // success
@@ -346,8 +361,8 @@ contract('Crowdsale', function(accounts){
       utils.mineToBlockHeight(startBlock);
       return token.crowdfundMaxEther().then(function(ethMax){
         return ethMax;
-      }).then(function(minWeiForSuccess){
-        return token.create({ from: accounts[0], value: minWeiForSuccess });
+      }).then(function(maxWeiForSuccess){
+        return token.create({ from: accounts[0], value: maxWeiForSuccess });
       }).then(function(){
         utils.mineToBlockHeight(endBlock);
         // success
@@ -367,8 +382,8 @@ contract('Crowdsale', function(accounts){
       utils.mineToBlockHeight(startBlock);
       return token.crowdfundMaxEther().then(function(ethMax){
         return ethMax;
-      }).then(function(minWeiForSuccess){
-        return token.create({ from: accounts[0], value: minWeiForSuccess });
+      }).then(function(maxWeiForSuccess){
+        return token.create({ from: accounts[0], value: maxWeiForSuccess });
       }).then(function(){
         utils.mineToBlockHeight(endBlock);
         // success
@@ -412,14 +427,15 @@ contract('Crowdsale', function(accounts){
   it(prefix + 'approve, allowance and transferFrom enabled', function(done) {
     let startBlock = 0;
     let endBlock = 0;
+    let maxWeiForSuccess;
     MultiSigWallet.new(accounts, 3).then(function(wallet){
       startBlock = web3.eth.blockNumber + 2;
       return FuckYouCoin.new(wallet.address, startBlock);
     }).then(function(token){
       utils.mineToBlockHeight(startBlock);
       return token.crowdfundMaxEther().then(function(ethMax){
-        let minWeiForSuccess = ethMax;
-        return token.create({ from: accounts[0], value: minWeiForSuccess });
+        maxWeiForSuccess = ethMax;
+        return token.create({ from: accounts[0], value: maxWeiForSuccess });
       }).then(function(){
         // success
         utils.mineToBlockHeight(endBlock);
@@ -452,7 +468,7 @@ contract('Crowdsale', function(accounts){
           assert(balance.equals(2));
         });
         token.balanceOf(accounts[0]).then(function(balance){
-          assert(balance.sub(tokenMin.sub(2)).equals(0));
+          assert(balance.sub(maxWeiForSuccess.sub(2)).equals(0));
         });
       });
     }).then(done).catch(done);

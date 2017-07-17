@@ -2,6 +2,10 @@ import { delay, takeEvery, takeLatest, throttle } from 'redux-saga'
 import { call, cps, put, take, race, select, fork, cancel, cancelled } from 'redux-saga/effects'
 
 import {
+  ICO_PREFUNDING,
+  ICO_FUNDING,
+  ICO_FUNDED,
+
   SET_CURRENT_BLOCK,
   setCurrentBlock,
   setIcoState,
@@ -16,6 +20,10 @@ import {
 } from './actions'
 
 import {
+  getEthRWStatus,
+} from '../selectors'
+
+import {
   SET_ETH_CONNECTION,
 } from '../actions'
 
@@ -27,11 +35,13 @@ var store
 
 export default function* rootSaga(config, theStore) {
   store = theStore
+  const coinConfig = config.contracts.FuckYouCoin
   yield take(SET_ETH_CONNECTION)
-  var coin = yield web3.eth.contract(config.abi).at(config.address)
+  var coin = yield web3.eth.contract(coinConfig.abi).at(coinConfig.address)
+  console.log('coin',coin)
   const isRW = yield select(getEthRWStatus)
   yield fork(watchCurrentBlock)
-  yield fork(watchIcoState)
+  yield fork(watchIcoState, coin)
   if(isRW) {
     yield icoRW(coin)
   }
@@ -43,16 +53,20 @@ function* icoRW(coin) {
 }
 
 function* buy(coin, action) {
-  const success = yield cps([coin, coin.create],
-    {from: action.from, value: web3.toWei(action.value, 'ether')})
-  if(!success) {
-    yield put(buyFailure(action.address))
+  try {
+    const success = yield cps([coin, coin.create],
+      {from: action.from, value: web3.toWei(action.value, 'ether')})
+    if(!success) {
+      yield put(buyFailure(action.from, action.value))
+    }
+  } catch(error) {
+    yield put(buyFailure(action.from, action.value, error))
   }
 }
 
 function processTransfer(evt) {
   const to = evt.args.to
-  const value = yield evt.args.value
+  const value = evt.args.value
   store.dispatch(transfer(to, value))
 }
 
@@ -95,7 +109,7 @@ function* watchIcoState(coin) {
     const startBlock = yield cps([coin, coin.fundingStartBlock])
     const endBlock = yield cps([coin, coin.fundingEndBlock])
     const fundedWei = yield cps([web3.eth, web3.eth.getBalance], coin.address)
-    const tokensPerEth = yield cps([coin, coin.tokensPerEth])
+    const tokensPerEth = yield cps([coin, coin.tokensPerEther])
     const icoNumState = yield cps([coin, coin.getState])
     const availableEth = crowdfundMaxEther - web3.fromWei(fundedWei, 'ether')
     const icoState = yield call(parseIcoState, icoNumState)
@@ -103,7 +117,7 @@ function* watchIcoState(coin) {
       startBlock.toNumber(),
       endBlock.toNumber(),
       availableEth,
-      tokensPerEth,
+      tokensPerEth.toNumber(),
       icoState
     ))
   }

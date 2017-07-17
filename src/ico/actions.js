@@ -10,8 +10,8 @@ export const BUY_FAILURE = 'BUY_FAILURE'
 /// other constants
 
 // ICO states
-export const ICO_PREFUNDING = 'ICO_PRESTART'
-export const ICO_FUNDING = 'ICO_ONGOING'
+export const ICO_PREFUNDING = 'ICO_PREFUNDING'
+export const ICO_FUNDING = 'ICO_FUNDING'
 export const ICO_FUNDED = 'ICO_FUNDED'
 
 // ICO parameters
@@ -63,7 +63,7 @@ export function transfer(to, value) {
   }
 }
 
-export function buy(to, value) {
+export function buy(from, value) {
   return {
     type: BUY,
     from,
@@ -71,17 +71,18 @@ export function buy(to, value) {
   }
 }
 
-export function buySuccess(to, value) {
+export function buySuccess(from, value) {
   return {
     type: BUY_SUCCESS,
     from,
     value,
   }
 }
-export function buy(to, value) {
+export function buyFailure(from, value, error) {
   return {
     type: BUY_FAILURE,
     from,
     value,
+    error,
   }
 }

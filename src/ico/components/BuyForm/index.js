@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 
 import {
   ICO_FUNDING,
+  buy,
 } from '../../actions'
 
 import {
@@ -26,22 +27,29 @@ class BuyForm extends React.Component {
   render() {
     const buttonDisabled = this.props.icoState != ICO_FUNDING && this.validAmount()
     const amountState = this.validAmount() ? '' : 'is-danger'
-    const fucAmount = amount * this.props.tokensPerEth
+    const fucAmount = this.state.amount * this.props.tokensPerEth
     return (
-      <div className='field has-addons'>
-        <p className='control'>
-          <input className={`input is-extra-large ${amountState}`}
-                 type='text'
-                 onChange={this.setAmount.bind(this)}
-                 value={this.state.amount} />
-        </p>
-        <p className='control'>
-          <a className='button is-success is-extra-large'
-             disabled={buttonDisabled}
-             onClick={this.props.buy.bind(this, this.state.amount)}>
-            BUY {fucAmount} FUC
-          </a>
-        </p>
+      <div className='level'>
+        <div className='level-item'>
+          <div className='field has-addons'>
+            <p className='control'>
+              <div className='eth-label'>
+                ETH
+              </div>
+              <input className={`input is-extra-large ${amountState}`}
+                     type='text'
+                     onChange={this.setAmount.bind(this)}
+                     value={this.state.amount} />
+            </p>
+            <p className='control'>
+              <a className='button is-success is-extra-large'
+                 disabled={buttonDisabled}
+                 onClick={this.props.buy.bind(this, this.state.amount)}>
+                BUY {fucAmount} FUC
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -56,7 +64,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    buy: amount => dispatch(buy(web3.eth.accounts[0], web3.toWei(Number(amount))))
+    buy: amount => dispatch(buy(web3.eth.accounts[0], Number(amount)))
   }
 }
 

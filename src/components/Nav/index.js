@@ -19,7 +19,9 @@ const Nav = props => {
         <Link className='nav-item'
               to='/bid'>Bid</Link>
         <Link className='nav-item'
-              to='/About'>About</Link>
+              to='/ico'>ICO</Link>
+        <Link className='nav-item'
+              to='/about'>About</Link>
       </div>
     </nav>
   )

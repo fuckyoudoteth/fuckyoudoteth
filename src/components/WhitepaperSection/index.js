@@ -1,12 +1,13 @@
 import React from 'react'
 
-export default const WhitepaperSection = props => {
+const WhitepaperSection = props => {
   return (
     <section className='section'>
       <nav className='level'>
         <div className='level-item'>
           <a className='button is-success is-large'
-             href='https://github.com/fuckyoudoteth/fuckyoudoteth/writing/whitepaper.md'>
+             target='_blank'
+             href='https://github.com/fuckyoudoteth/fuckyoudoteth/blob/master/writing/whitepaper.md'>
             Read the Whitepaper
           </a>
         </div>
@@ -14,3 +15,5 @@ export default const WhitepaperSection = props => {
     </section>
   )
 }
+
+export default WhitepaperSection
