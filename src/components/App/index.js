@@ -32,7 +32,9 @@ const LandingApp = props => {
 const App = props => {
   return (
     <div id='wrapper'>
-      <Nav />
+      <div className='container'>
+        <Nav />
+      </div>
       <section id='inner-wrapper' className='section'>
         <div className='container'>
           <Route exact path="/about" component={AboutPage} />

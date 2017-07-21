@@ -114,6 +114,15 @@ class BidForm extends React.Component {
       this.validMessage()
   }
 
+  sendBid() {
+    if(this.validBidForm()) {
+      this.props.sendBid(
+        this.state.bidder,
+        this.state.amount,
+        this.state.donationAddress,
+        this.state.message)
+    }
+  }
   render() {
     const bidStateClass = this.validBid() && this.higherBid(this.state.amount) || this.state.amount === '' ?
         '' : 'is-danger'
@@ -198,12 +207,7 @@ class BidForm extends React.Component {
 
         <div className='button is-primary'
              disabled={!this.validBidForm()}
-             onClick={this.props.sendBid.bind(
-               this,
-               this.state.bidder,
-               this.state.amount,
-               this.state.donationAddress,
-               this.state.message)}>
+             onClick={this.sendBid.bind(this)}>
           { bidButtonText }
         </div>
       </div>

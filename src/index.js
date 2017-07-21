@@ -15,6 +15,7 @@ import { createLogger } from "redux-logger"
 import { reducer as notifications } from 'react-notification-system-redux'
 
 import 'bulma'
+import 'font-awesome/css/font-awesome.min.css'
 import './styles.css'
 
 import constants from '../constants'
