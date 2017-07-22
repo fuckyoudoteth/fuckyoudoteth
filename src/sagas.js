@@ -49,7 +49,6 @@ var store
 
 export default function* rootSaga(config, theStore) {
   store = theStore
-  console.log(config)
   yield fork(watchAuction, config.contracts.FuckYouAuction)
   yield startEthConnection(config.network)
   yield fork(watchEthConnection)
@@ -142,7 +141,6 @@ function* watchEthConnection() {
 function* watchAuction(config) {
   yield take(SET_ETH_CONNECTION)
   var auction = yield web3.eth.contract(config.abi).at(config.address)
-  console.log('auction',auction)
   const isRW = yield select(getEthRWStatus)
   if(isRW) {
     yield watchAuctionRW(auction)

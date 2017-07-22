@@ -38,7 +38,6 @@ export default function* rootSaga(config, theStore) {
   const coinConfig = config.contracts.FuckYouCoin
   yield take(SET_ETH_CONNECTION)
   var coin = yield web3.eth.contract(coinConfig.abi).at(coinConfig.address)
-  console.log('coin',coin)
   const isRW = yield select(getEthRWStatus)
   yield fork(watchCurrentBlock)
   yield fork(watchIcoState, coin)

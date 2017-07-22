@@ -2,10 +2,45 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import { donate } from '../../actions'
-import { getAuctionBid } from '../../selectors'
+import { getAuctionBid, getWinningLoading } from '../../selectors'
 
 import Nav from '../Nav'
 import Identicon from '../Identicon'
+
+const AuctionFooter = props => {
+  console.log('porpppps',props)
+  return (
+    <div className='hero-foot'>
+      <nav className='level'>
+        <div className='level-item'>
+          <div className='has-text-centered'>
+            <div className='heading'>Auction #</div>
+            <div className='subtitle'>{props.auctionNumber}</div>
+          </div>
+        </div>
+        <div className='level-item'>
+          <div className='has-text-centered'>
+            <div className='heading'>Winning Bid</div>
+            <div className='subtitle'>{props.amount} ETH</div>
+          </div>
+        </div>
+        {
+          props.donationAddress != '0x0000000000000000000000000000000000000000' ?
+            <div className='level-item is-link'
+                 onClick={() => props.donate(props.donationAddress)}>
+              <div className='has-text-centered'>
+                <div className='heading'>Donate to</div>
+                <div className='title'>
+                  <Identicon centered address={props.donationAddress} />
+                </div>
+              </div>
+            </div> : null
+        }
+      </nav>
+      <nav className='level' />
+    </div>
+  )
+}
 
 const Auction = props => {
   return (
@@ -23,10 +58,12 @@ const Auction = props => {
             <div className='column is-6 is-offset-1'>
               <div className='title is-4'>Front Page Fuck You of the Internet</div>
               {
+                props.loading ?
+                <div /> :
                 props.amount && props.amount != '0' ?
-                  <div className='content'>
-                    <div className='title is-spaced'>{props.message}</div>
-                    <div className='subtitle'>
+                  <div classname='content'>
+                    <div classname='title is-spaced'>{props.message}</div>
+                    <div classname='subtitle'>
                       -<span> {props.bidder}</span>
                     </div>
                   </div> :
@@ -36,41 +73,16 @@ const Auction = props => {
           </div>
         </div>
       </div>
-      <div className='hero-foot'>
-        <nav className='level'>
-          <div className='level-item'>
-            <div className='has-text-centered'>
-              <div className='heading'>Auction #</div>
-              <div className='subtitle'>{props.auctionNumber}</div>
-            </div>
-          </div>
-          <div className='level-item'>
-            <div className='has-text-centered'>
-              <div className='heading'>Winning Bid</div>
-              <div className='subtitle'>{props.amount} ETH</div>
-            </div>
-          </div>
-          {
-            props.donationAddress != '0x0000000000000000000000000000000000000000' ?
-              <div className='level-item is-link'
-                   onClick={() => props.donate(props.donationAddress)}>
-                <div className='has-text-centered'>
-                  <div className='heading'>Donate to</div>
-                  <div className='title'>
-                    <Identicon centered address={props.donationAddress} />
-                  </div>
-                </div>
-              </div> : null
-          }
-        </nav>
-        <nav className='level' />
-      </div>
-    </div>
+      {!props.loading && <AuctionFooter {...props} />}
+  </div>
   )
 }
 
 const mapStateToProps = (state, ownProps) => {
-  return getAuctionBid(state, ownProps)
+  return {
+    ...getAuctionBid(state, ownProps),
+    loading: getWinningLoading(state),
+  }
 }
 
 const mapDispatchToProps = dispatch => {

@@ -16,7 +16,7 @@ as a daily dividend.
 Marshall McLuhan once postulated that "all forms of violence are quests for
 identity".
 When we, as humans, feel our identities threatened,
-we instinctually lash out to reassert our sense of selves.
+we instinctively lash out to reassert our sense of selves.
 
 In modern times, the means of asserting our agency has branched out from
 mainly physical forms of demonstration, to mainly the realm of the verbal.
@@ -30,7 +30,7 @@ Unfortunately, its also resulted in a sea of content that makes it
 nearly impossible to have messages actually heard over the cacophony of voices.
 There is simply too much noise in proportion to any one person's signal.
 
-What is left is a burning desire for individuals to be heard, **on a high-profile channel**.
+What is left is a burning desire for individuals to be heard, on a high-profile channel.
 And in our global village, where opinions naturally differ
 and abrasive situations present themselves,
 people desire a platform to say.... fuck you.
@@ -44,40 +44,16 @@ frontpage fuck-you of the internet.
 
 ![Network Diagram](network_diagram.png)
 
-All collected ether proceeds from the auction process are paid into a
-beneficiary account. The beneficiary, the FuckYouCoin contract, can withdraw all
-beneficiary funds into its own account.
-The coin contract, in turn, divvies out all funds sent to it to the coinholders.
-
 ## Auction Details
 
-There are three main functions that users of the auction will use: `bid`,
-`resetAuction`, and `withdraw`.
+Each auction has a bidding time of one day (86400 seconds). During that time,
+bids (in ETH) with attached messages can be submitted, with only higher bids
+being accepted over time. Once the auction time is expired and the auction is reset,
+the winning bid and message is published on the home page.
 
-#### Bidding
-
-When a participant creates a bid, all elements of the bid are required upfront,
-including their message to publish, with all elements being encoded at
-the time of bid, rather than at a later stage.
-A `bid` in the FuckYouAuction consists of a `bidder`, `amount`,
-`donationAddress`, and `message`.
-The `bidder` is the address of the participant, the `amount` is the total number
-of wei (the smallest denomination of ether) to bid, the `donationAddress` is an Ethereum address to be published upon
-winning the auction, the `message` is, at the UI level, a 128 byte length UTF-8
-string, at the contract level, 4 32 byte UTF-8 strings to also be published upon
-winning the auction.
-
-#### Ending the Auction
-
-When the auction time has expired, the auction becomes open for reset.
-The auction then requires an explicit `resetAuction` call or a new `bid`.
-In this case, the `bid` call will perform an implicit `resetAuction`.
-
-#### Withdrawing Losing Bids
-
-Whenever an auction participant is outbid with a higher amount, the participant
-is able to retrieve 99% of their losing bid through a `withdraw` call. The 1%
-remaining is added to the beneficiary fund.
+Losing bidders can retrieve 99% of their bids, but the winning bidder's bid is
+consumed. All collected ether proceeds get paid as dividends, on-demand,
+to FuckYouCoin (FUC) holders.
 
 ## Roadmap Features
 
@@ -141,3 +117,38 @@ the ICO.
 |   for crowdfunding participants           | 12 000 000 FUC      |
 
 |   for FUC team                            |  2 200 000 FUC      |
+
+## Contract Details
+
+All collected ether proceeds from the auction process are paid into a
+beneficiary account. The beneficiary, the FuckYouCoin contract, can withdraw all
+beneficiary funds into its own account.
+The coin contract, in turn, divvies out all funds sent to it to the coinholders.
+
+There are three main functions that users of the auction will use: `bid`,
+`resetAuction`, and `withdraw`.
+
+#### Bidding
+
+When a participant creates a bid, all elements of the bid are required upfront,
+including their message to publish, with all elements being encoded at
+the time of bid, rather than at a later stage.
+A `bid` in the FuckYouAuction consists of a `bidder`, `amount`,
+`donationAddress`, and `message`.
+The `bidder` is the address of the participant, the `amount` is the total number
+of wei (the smallest denomination of ether) to bid, the `donationAddress` is an Ethereum address to be published upon
+winning the auction, the `message` is, at the UI level, a 128 byte length UTF-8
+string, at the contract level, 4 32 byte UTF-8 strings to also be published upon
+winning the auction.
+
+#### Ending the Auction
+
+When the auction time has expired, the auction becomes open for reset.
+The auction then requires an explicit `resetAuction` call or a new `bid`.
+In this case, the `bid` call will perform an implicit `resetAuction`.
+
+#### Withdrawing Losing Bids
+
+Whenever an auction participant is outbid with a higher amount, the participant
+is able to retrieve 99% of their losing bid through a `withdraw` call. The 1%
+remaining is added to the beneficiary fund.

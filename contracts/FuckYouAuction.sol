@@ -1,8 +1,11 @@
 pragma solidity ^0.4.11;
 
 import './owned.sol';
+import './SafeMath.sol';
 
-contract FuckYouAuction is owned {
+contract FuckYouAuction is owned, SafeMath {
+    uint constant multiplier = 10e18;
+
     struct Bid {
       address bidder;
       uint amount;
@@ -75,11 +78,11 @@ contract FuckYouAuction is owned {
     }
 
     function() payable {
-      beneficiaryTotal += msg.value;
+      beneficiaryTotal = safeAdd(beneficiaryTotal, msg.value);
     }
 
     function auctionEndTime() constant returns (uint) {
-      return auctionStartTime + biddingTime;
+      return safeAdd(auctionStartTime, biddingTime);
     }
 
     function auctionOver() constant returns (bool) {
@@ -119,7 +122,7 @@ contract FuckYouAuction is owned {
         highest = Bid(0,0,0,0,0,0,0);
 
         // Increment the beneficiary's stash
-        beneficiaryTotal += winning.amount;
+        beneficiaryTotal = safeAdd(beneficiaryTotal, winning.amount);
 
         // Increment auction variables
         incrementAuctionState();
@@ -155,7 +158,12 @@ contract FuckYouAuction is owned {
             // because it can be prevented by the caller by e.g.
             // raising the call stack to 1023. It is always safer
             // to let the recipients withdraw their money themselves.
-            pendingReturns[highest.bidder] += highest.amount;
+            // return 99% of bid
+            pendingReturns[highest.bidder] =
+              safeAdd(pendingReturns[highest.bidder],
+                safeDiv(safeDiv(
+                  safeMul(safeMul(highest.amount, 99), multiplier),
+                  100), multiplier));
         }
 
         // set current highest bidder's data

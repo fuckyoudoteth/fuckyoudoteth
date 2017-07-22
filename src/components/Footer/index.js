@@ -21,7 +21,7 @@ const Footer = props => {
           <p><Link to='/about'>ICO</Link></p>
           <p><Link to='/about'>About</Link></p>
           <p>
-            Made with 🖕 by anonymous fucks
+            made with 🖕 by anonymous fucks
           </p>
           <p>
             &copy; 2017 by the FU Collective

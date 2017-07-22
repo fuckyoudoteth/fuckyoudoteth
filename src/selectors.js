@@ -45,3 +45,18 @@ export const getWithdrawals = state => state.site.withdrawals
 export const getPendingBid = state => state.site.pendingBid
 export const getPendingReset = state => state.site.pendingReset
 export const getPendingWithdrawals = state => state.site.pendingWithdrawals
+
+export const getCurrentLoading = createSelector(
+  [getAuctions, getAuctionNumber],
+  (auctions, number) => !auctions[number],
+)
+
+export const getWinningLoading = createSelector(
+  [getAuctions, getAuctionNumber],
+  (auctions, number) => !auctions[number - 1],
+)
+
+export const getEthLoading =  createSelector(
+  [getEth],
+  eth => eth.network === '',
+)

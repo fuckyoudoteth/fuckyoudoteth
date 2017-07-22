@@ -14,9 +14,9 @@ import Identicon from '../Identicon'
 
 const initialBid = () => {
   return {
-    bidder: web3.eth.defaultAccount,
+    bidder: '',
     amount: '',
-    donationAddress: web3.eth.defaultAccount,
+    donationAddress: '',
     message: '',
   }
 }
@@ -85,6 +85,10 @@ class BidForm extends React.Component {
     this.setState({donationAddress: evt.target.value})
   }
 
+  validBidder() {
+    return web3.isAddress(this.state.bidder)
+  }
+
   validDonationAddress() {
     return web3.isAddress(this.state.donationAddress)
   }
@@ -108,6 +112,7 @@ class BidForm extends React.Component {
 
   validBidForm() {
     return !this.props.pendingBid &&
+      this.validBidder() &&
       this.validBid() &&
       this.higherBid(this.state.amount) &&
       (this.validDonationAddress() || this.state.donationAddress === '') &&
@@ -130,12 +135,17 @@ class BidForm extends React.Component {
       <div className='control'>
         <Identicon address={this.state.donationAddress} />
       </div> : null
+    const bidderClass =
+      this.validBidder() || this.state.donationAddress === '' ?
+        '' : 'is-danger'
     const donationAddressStateClass =
       this.validDonationAddress() || this.state.donationAddress === '' ?
         '' : 'is-danger'
     const bidButtonText = !this.props.pendingBid ?
       this.props.auctionEnded ?
         'Start New Auction & Bid!' : 'Bid Now!' : 'Bidding...'
+    const bidLoading = this.props.pendingBid && !this.props.auctionEnded
+    const buttonLoadingClass = bidLoading ? 'is-loading' : ''
     const pending = !!this.props.pendingBid
     return (
       <div className='field'>
@@ -148,11 +158,14 @@ class BidForm extends React.Component {
                 <Identicon address={this.state.bidder} />
               </div>
               <p className='control is-expanded'>
-                <span className='select'>
+                <span className={`select ${bidderClass}`}>
                   <select disabled={pending}
                           value={this.state.bidder}
                           onChange={this.setBidder.bind(this)}>
-                    { web3.eth.accounts.map(a => <option key={a}>{a}</option>) }
+                    { (this.state.bidder === '' ? [''] : [])
+                        .concat(web3.eth.accounts)
+                        .map(a => <option key={a}>{a}</option>)
+                    }
                   </select>
                 </span>
               </p>
@@ -205,7 +218,7 @@ class BidForm extends React.Component {
           <p className='help'>Optional ethereum address to show along with message</p>
         </div>
 
-        <div className='button is-primary'
+        <div className={`button is-primary ${buttonLoadingClass}`}
              disabled={!this.validBidForm()}
              onClick={this.sendBid.bind(this)}>
           { bidButtonText }

@@ -1,12 +1,15 @@
 import React from 'react'
 
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 
 const Nav = props => {
+  const navClass='nav-item'
+  const navActiveClass='is-active'
+  const navHomeActiveClass='is-home'
   return (
     <nav className='nav'>
       <div className='nav-left'>
-        <Link className='nav-item'
+        <Link className={navClass}
               to='/'>
           <strong className='content'>
             FU.eth
@@ -14,14 +17,19 @@ const Nav = props => {
         </Link>
       </div>
       <div className='nav-right'>
-        <Link className='nav-item'
-              to='/'>Home</Link>
-        <Link className='nav-item'
-              to='/bid'>Bid</Link>
-        <Link className='nav-item'
-              to='/ico'>ICO</Link>
-        <Link className='nav-item'
-              to='/about'>About</Link>
+        <NavLink className={navClass}
+                 activeClassName={navHomeActiveClass}
+                 exact={true}
+                 to='/'>Home</NavLink>
+        <NavLink className={navClass}
+                 activeClassName={navActiveClass}
+              to='/bid'>Bid</NavLink>
+        <NavLink className={navClass}
+                 activeClassName={navActiveClass}
+                 to='/ico'>ICO</NavLink>
+        <NavLink className={navClass}
+                 activeClassName={navActiveClass}
+                 to='/about'>About</NavLink>
       </div>
     </nav>
   )

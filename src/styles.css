@@ -36,6 +36,15 @@ body, #app {
   margin-bottom: 1em;
 }
 
+.is-active.nav-item {
+  background-color: #00d1b2;
+  color: whitesmoke !important;
+}
+
+.is-home.nav-item {
+  color: whitesmoke !important;
+}
+
 .is-link {
   cursor: pointer;
 }

@@ -1,7 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { getEthRWStatus } from '../../selectors'
+import {
+  getCurrentLoading,
+  getEthLoading,
+  getEthRWStatus,
+} from '../../selectors'
 
 import BidForm from '../BidForm'
 import CurrentAuctionStatus from '../CurrentAuctionStatus'
@@ -14,7 +18,10 @@ const BidPage = props => {
       <div className='columns'>
         <div className='column'>
           <div className='title'>Current Highest Bid</div>
-          <CurrentAuctionStatus />
+          {
+            !props.bidLoading &&
+              <CurrentAuctionStatus />
+          }
         </div>
         {
           props.eth ?
@@ -25,6 +32,8 @@ const BidPage = props => {
         }
       </div>
       {
+        props.ethLoading ?
+          <div /> :
         props.eth ?
         <div>
           <div className='title'>Pending Withdrawals</div>
@@ -43,6 +52,8 @@ const BidPage = props => {
 const mapStateToProps = state => {
   return {
     eth: getEthRWStatus(state),
+    ethLoading: getEthLoading(state),
+    bidLoading: getCurrentLoading(state),
   }
 }
 
