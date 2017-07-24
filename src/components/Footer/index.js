@@ -24,7 +24,7 @@ const Footer = props => {
             made with 🖕 by anonymous fucks
           </p>
           <p>
-            &copy; 2017 by the FU Collective
+            &copy; 2017 the FU Collective
           </p>
         </div>
       </div>

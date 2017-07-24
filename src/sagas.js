@@ -225,6 +225,7 @@ function* sendBid(auction, action) {
     const amount = yield cps([auction, auction.bid],
       action.donationAddress,
       msg0, msg1, msg2, msg3,
+      false,
       {from: action.bidder, value: web3.toWei(action.amount, 'ether'), gas:1000000})
   } catch(e) {
     yield put(sendBidFailure(e))

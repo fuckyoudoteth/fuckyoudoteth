@@ -24,11 +24,9 @@ Not only is it more resource efficient to use verbal communication to
 assert ourselves, its often more effective.
 
 In the social media era, everyone has been given an online presence.
-The proliferation of content-generation tools has, on one hand,
+The proliferation of content-generation tools has~~, on one hand,~~
 made it easier than ever to send messages out with a global reach.
-Unfortunately, its also resulted in a sea of content that makes it
-nearly impossible to have messages actually heard over the cacophony of voices.
-There is simply too much noise in proportion to any one person's signal.
+Unfortunately, ~~its also resulted in~~ a sea of content |propagated (possibly use "formed" or "developed" instead)| making it nearly impossible to have messages actually heard over the cacophony of voices. There is simply too much noise in proportion to any one person's signal.
 
 What is left is a burning desire for individuals to be heard, on a high-profile channel.
 And in our global village, where opinions naturally differ
@@ -39,7 +37,7 @@ people desire a platform to say.... fuck you.
 
 The FuckYou network is centered around a daily auction for exclusive digital
 real estate. Participants bid for access to the FuckYou.eth homepage and
-associated message distribution channels. We expect FuckYou.eth to become the
+associated message distribution channels. We ~~expect~~ |anticipate| FuckYou.eth to become the
 frontpage fuck-you of the internet.
 
 ![Network Diagram](network_diagram.png)
@@ -51,15 +49,15 @@ bids (in ETH) with attached messages can be submitted, with only higher bids
 being accepted over time. Once the auction time is expired and the auction is reset,
 the winning bid and message is published on the home page.
 
-Losing bidders can retrieve 99% of their bids, but the winning bidder's bid is
-consumed. All collected ether proceeds get paid as dividends, on-demand,
+Losing bidders can retrieve 99% of their bids. The winning ~~bidder's~~ bid is
+~~consumed~~ |collected in its entirety|. All collected ether proceeds get paid as dividends, on-demand,
 to FuckYouCoin (FUC) holders.
 
 ## Roadmap Features
 
 - **Historical Auction View** - A way to easily access previous auction results
 through the FuckYou website. This view will make winning auctions much more
-valuable, as participants' messages will be accessible and enshrined on the site
+valuable, as participants' messages will be accessible and enshrined on the |FuckYouDotEth| site
 forever.
 
 - **Twitter Bot** - A public Twitter account tweeting all action from the
@@ -71,7 +69,7 @@ FuckYouDotEth account.
 
 - **Public API** - A public REST API to interact with the FuckYou network, as
 well as software to run your own API service. A public API paves the way for
-traditional webapps to access the FuckYou network without needing specialized
+traditional web apps to access the FuckYou network without needing specialized
 Ethereum software.
 
 - **Mobile Apps** - Android and iOS apps to interact with the FuckYou network.
@@ -91,7 +89,7 @@ By doing so, they create FUCs at a rate of between 1200 to 800 FUCs per 1 ETH.
 
 The crowdfunding will take place over the course of 30 days, starting after 2
 weeks of the FuckYou network's operation.
-Early ICO participants will receive 1200 FUCs per 1 ETH for the first ~5 days
+Early ICO participants will receive 1200 FUCs per 1 ETH for the first 5 days
 (where a day = 4800 blocks) of the crowdsale, and for the next 25 days, the rate
 will drop by 16 FUC/ETH daily until it reaches 800 FUC/ETH for the final day of
 the ICO.
@@ -115,7 +113,7 @@ the ICO.
 ## Contract Details
 
 All collected ether proceeds from the auction process are paid into a
-beneficiary account. The beneficiary, the FuckYouCoin contract, can withdraw all
+beneficiary account. The beneficiary, the FuckYouCoin contract, can (if this is something that is automatically done, or something to be done everytime? If so get rid of "can"/add s to withdraw) withdraw all
 beneficiary funds into its own account.
 The coin contract, in turn, divvies out all funds sent to it to the coinholders.
 

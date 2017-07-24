@@ -139,7 +139,8 @@ contract FuckYouAuction is owned, SafeMath {
       bytes32 _msg0,
       bytes32 _msg1,
       bytes32 _msg2,
-      bytes32 _msg3
+      bytes32 _msg3,
+      bool useReturns
     ) payable {
         // If the auction should be over,
         // close the current one and start a new one.
@@ -148,9 +149,16 @@ contract FuckYouAuction is owned, SafeMath {
           resetAuction();
         }
 
+        // set bid value
+        var value = msg.value;
+        if(useReturns) {
+          value = safeAdd(value, pendingReturns[msg.sender]);
+          pendingReturns[msg.sender] = 0;
+        }
+
         // If the bid is not higher, send the
         // money back.
-        require(msg.value > highest.amount);
+        require(value > highest.amount);
 
         if (highest.bidder != 0) {
             // Sending back the money by simply using
@@ -169,7 +177,7 @@ contract FuckYouAuction is owned, SafeMath {
         // set current highest bidder's data
         highest = Bid(
           msg.sender,
-          msg.value,
+          value,
           donationAddress,
           _msg0,
           _msg1,
@@ -181,7 +189,7 @@ contract FuckYouAuction is owned, SafeMath {
           auctionNumber,
           msg.sender,
           donationAddress,
-          msg.value,
+          value,
           _msg0,
           _msg1,
           _msg2,
@@ -227,7 +235,4 @@ contract FuckYouAuction is owned, SafeMath {
         beneficiary = _beneficiary;
     }
 
-    function selfDestruct(address recipient) onlyOwner {
-      selfdestruct(recipient);
-    }
 }
