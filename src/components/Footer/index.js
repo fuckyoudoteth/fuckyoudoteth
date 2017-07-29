@@ -17,14 +17,14 @@ const Footer = props => {
               Whitepaper
             </a>
           </p>
-          <p><Link to='/about'>Bid</Link></p>
-          <p><Link to='/about'>ICO</Link></p>
+          <p><Link to='/bid'>Bid</Link></p>
+          <p><Link to='/ico'>ICO</Link></p>
           <p><Link to='/about'>About</Link></p>
           <p>
             made with 🖕 by anonymous fucks
           </p>
           <p>
-            &copy; 2017 the FU Collective
+            &copy; 2017 the fu collective
           </p>
         </div>
       </div>

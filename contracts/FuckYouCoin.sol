@@ -262,7 +262,7 @@ contract FuckYouCoin is SafeMath, ERC20 {
     lastDispersalBalance = this.balance;
   }
 
-  function disperseAuctionFunds() {
+  function disperseFunds() {
     FuckYouAuction(fuckYouAuction).beneficiaryWithdraw();
     updatePendingDispersal();
     disperse(pendingDispersalBalance);

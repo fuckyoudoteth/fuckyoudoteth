@@ -7,6 +7,39 @@ import { getAuctionBid, getWinningLoading } from '../../selectors'
 
 import Nav from '../Nav'
 import Identicon from '../Identicon'
+import DonationModal from '../DonationModal'
+
+class DonationItem extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      donationOpen: false,
+    }
+  }
+  openDonationModal() {
+    this.setState({donationOpen: true})
+  }
+  closeDonationModal(evt) {
+    this.setState({donationOpen: false})
+    evt.stopPropagation()
+  }
+  render() {
+    return (
+      <div className='level-item is-link'
+           onClick={() => this.openDonationModal()}>
+        <div className='has-text-centered'>
+          <div className='heading'>Donate to</div>
+          <div className='title'>
+            <Identicon centered address={this.props.donationAddress} />
+          </div>
+        </div>
+        <DonationModal {...this.props}
+                       open={this.state.donationOpen}
+                       closeModal={(evt) => this.closeDonationModal(evt)} />
+      </div>
+    )
+  }
+}
 
 const AuctionFooter = props => {
   return (
@@ -26,15 +59,7 @@ const AuctionFooter = props => {
         </div>
         {
           props.donationAddress != '0x0000000000000000000000000000000000000000' ?
-            <div className='level-item is-link'
-                 onClick={() => props.donate(props.donationAddress)}>
-              <div className='has-text-centered'>
-                <div className='heading'>Donate to</div>
-                <div className='title'>
-                  <Identicon centered address={props.donationAddress} />
-                </div>
-              </div>
-            </div> : null
+            <DonationItem {...props} />: null
         }
       </nav>
       <nav className='level' />
@@ -65,9 +90,9 @@ const Auction = props => {
                     props.loading ?
                     <div /> :
                     props.amount && props.amount != '0' ?
-                      <div classname='content'>
-                        <div classname='title is-spaced'>{props.message}</div>
-                        <div classname='subtitle'>
+                      <div className='content'>
+                        <div className='title is-spaced'>{props.message}</div>
+                        <div className='subtitle'>
                           -<span> {props.bidder}</span>
                         </div>
                       </div> :
