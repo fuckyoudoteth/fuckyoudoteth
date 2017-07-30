@@ -26,9 +26,6 @@ const Nav = props => {
               to='/bid'>Bid</NavLink>
         <NavLink className={navClass}
                  activeClassName={navActiveClass}
-                 to='/ico'>ICO</NavLink>
-        <NavLink className={navClass}
-                 activeClassName={navActiveClass}
                  to='/about'>About</NavLink>
       </div>
     </nav>

@@ -70,3 +70,13 @@ body, #app {
   opacity: 1;
   transition: opacity 500ms ease-in;
 }
+
+.highest-bid {
+  background-color: rgba(200,200,200,0.1);
+}
+
+.pending-withdraw {
+  box-shadow: 0 1px 0 rgba(50, 50, 50, 0.2);
+  line-height: 2em;
+}
+
