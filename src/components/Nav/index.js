@@ -2,6 +2,8 @@ import React from 'react'
 
 import { Link, NavLink } from 'react-router-dom'
 
+import logoSrc from '../../../images/logo.png'
+
 const Nav = props => {
   const navClass='nav-item'
   const navActiveClass='is-active'
@@ -9,12 +11,18 @@ const Nav = props => {
   return (
     <nav className='nav'>
       <div className='nav-left'>
+      <div className='nav-item'>
+        <img src={logoSrc} alt='FuckYou.Eth Logo' />
+      </div>
+      <div className='nav-item'>
+
         <Link className={navClass}
               to='/'>
           <strong className='content'>
             FU.eth
           </strong>
         </Link>
+      </div>
       </div>
       <div className='nav-right'>
         <NavLink className={navClass}

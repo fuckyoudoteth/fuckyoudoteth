@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import CSSTransition from 'react-transition-group/CSSTransition'
+import TransitionGroup from 'react-transition-group/TransitionGroup'
 
 import {
   getCurrentLoading,
@@ -13,63 +14,120 @@ import CurrentAuctionStatus from '../CurrentAuctionStatus'
 import ROEthWarning from '../ROEthWarning'
 import WithdrawalStatus from '../WithdrawalStatus'
 
-const BidPage = props => {
-  return (
-    <div>
-      <div className='tile is-ancestor'>
-        <div className='tile is-parent'>
-          <div className='tile is-child is-4 highest-bid box'>
-            <div className='title has-text-centered'>Current Highest Bid</div>
-            <CSSTransition in={!props.bidLoading}
-                           timeout={200}
-                           classNames='fade-in'>
-              {
-                props.bidLoading ?
-                  <div /> :
-                  <div className='box'>
-                    <CurrentAuctionStatus />
-                  </div>
-              }
-            </CSSTransition>
-          </div>
-          <div className="tile is-child">
-            <CSSTransition in={!props.ethLoading}
-                           timeout={200}
-                           classNames='fade-in'>
-              {
-                props.ethLoading ?
-                  <div/> :
-                  !props.eth ?
-                    <div /> :
-                    <div className='box'>
-                      <div className='title has-text-centered'>New Bid</div>
-                      <BidForm />
-                    </div>
-              }
-            </CSSTransition>
-          </div>
+const tabs = [
+  'New Bid',
+  'Current Highest Bid',
+  'Pending Withdrawals',
+]
+
+const CurrentHighestBid = props => (
+    <CSSTransition in={!props.bidLoading}
+                   timeout={200}
+                   classNames='fade-in'>
+      {
+        props.bidLoading ?
+          <div /> :
+          <CurrentAuctionStatus />
+      }
+    </CSSTransition>
+)
+
+const NewBid = props => (
+  <CSSTransition in={!props.ethLoading}
+                 timeout={200}
+                 classNames='fade-in'>
+    {
+      props.ethLoading ?
+        <div/> :
+      !props.eth ?
+        <div /> :
+        <div>
+          <BidForm />
         </div>
-      </div>
-      <CSSTransition in={!props.ethLoading}
+    }
+  </CSSTransition>
+)
+
+const PendingWithdrawals = props => (
+  <CSSTransition in={!props.ethLoading}
                      timeout={200}
                      classNames='fade-in'>
-        {
-          props.ethLoading ?
-            <div /> :
-          props.eth ?
-          <div>
-            <div className='title pending-withdraw'>Pending Withdrawals</div>
-            <WithdrawalStatus />
-          </div> :
-          <div className='columns'>
-            <div className='column is-half is-offset-one-quarter'>
-              <ROEthWarning />
-            </div>
-          </div>
-        }
-      </CSSTransition>
+    {
+      props.ethLoading ?
+        <div /> :
+      !props.eth ?
+        <div /> :
+        <div>
+          <WithdrawalStatus />
+        </div>
+    }
+  </CSSTransition>
+)
+
+const BidPageElement = ({children, ...props}) => (
+  <CSSTransition
+    {...props}
+    key={props.key}
+    timeout={500}
+    classNames='wipe-in'>
+    <div>
+    <div className='card'>
+    <div className='card-content'>
+    {children}
     </div>
-  )
+    </div>
+    {
+      !props.ethLoading && !props.eth &&
+        <ROEthWarning />
+    }
+    <div className='bottom-image dolphin' />
+    </div>
+  </CSSTransition>
+)
+
+class BidPage extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      currentTab: 0,
+    }
+  }
+  render() {
+    return (
+      <div>
+        <div className='bid-tabs tabs is-right'>
+          <ul>
+            {tabs.map((t, ix) => (
+              <li key={ix}
+                  className={ix == this.state.currentTab && 'is-active'}
+                  onClick={() => this.setState({currentTab: ix})}>
+                <a>
+                {t}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <TransitionGroup>
+        {
+          this.state.currentTab == 0 ?
+            <BidPageElement {...this.props} key={0}>
+              <NewBid {...this.props} />
+            </BidPageElement>
+          : this.state.currentTab == 1 ?
+            <BidPageElement {...this.props} key={1}>
+              <CurrentHighestBid {...this.props} />
+            </BidPageElement>
+          : this.state.currentTab == 2 ?
+            <BidPageElement {...this.props} key={2}>
+              <PendingWithdrawals {...this.props} />
+            </BidPageElement>
+          : <div />
+        }
+        </TransitionGroup>
+      </div>
+    )
+  }
 }
 
 const mapStateToProps = state => {

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 const CallToAuction = props => {
   return (
-    <section className='section'>
+    <section className='cta-section section is-large'>
       <div className='level is-centered is-vertical'>
         <div className='level-item has-text-centered'>
           <p className='title'>Join the next auction!</p>

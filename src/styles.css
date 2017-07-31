@@ -15,6 +15,7 @@ body, #app {
 
 #inner-wrapper {
   flex: 1;
+  background: #efefef;
 }
 
 .is-centered.level {
@@ -71,12 +72,51 @@ body, #app {
   transition: opacity 500ms ease-in;
 }
 
-.highest-bid {
-  background-color: rgba(200,200,200,0.1);
+.wipe-in-enter {
+  opacity: 0.01;
 }
 
-.pending-withdraw {
-  box-shadow: 0 1px 0 rgba(50, 50, 50, 0.2);
-  line-height: 2em;
+.wipe-in-enter.wipe-in-enter-active {
+  opacity: 1;
+  transition: opacity 1000ms ease-in;
+}
+.cta-section {
+  background: #efefef;
+}
+.steps-section {
+  background: inherit;
+}
+.whitepaper-section {
+  background: rgb(225, 225, 251);
+}
+.is-xl {
+  font-size: 4rem;
+}
+.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.auction-hero.hero.is-dark.is-bold {
+  background-image: url('../images/mcfu.png'),
+  linear-gradient(141deg, #1f191a 0%, #363636 71%, #46403f 100%);
+  background-size: cover;
+}
+.bottom-image {
+  background-size: contain;
+  background-repeat: no-repeat;
+  padding-bottom: 28rem;
+  margin-bottom: -3rem;
+}
+.sassy {
+  background-image: url('../images/sassy.png');
+  background-position: 70%;
+}
+.dolphin {
+  background-image: url('../images/dolphin.png');
+  background-position: center;
 }
 
+.bid-tabs {
+  margin-top: -3rem;
+}

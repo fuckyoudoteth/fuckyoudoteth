@@ -18,7 +18,6 @@ const Footer = props => {
             </a>
           </p>
           <p><Link to='/bid'>Bid</Link></p>
-          <p><Link to='/ico'>ICO</Link></p>
           <p><Link to='/about'>About</Link></p>
           <p>
             made with 🖕 by anonymous fucks

@@ -10,7 +10,7 @@ const createEthQRCodeDataUrl = (address, amount, cb) => {
   }, cb)
 }
 
-class DonationModal extends React.Component {
+class AddressModal extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -20,13 +20,13 @@ class DonationModal extends React.Component {
     setTimeout(() => this.setUrl(), 1)
   }
   componentDidUpdate(prevProps, prevState) {
-    if(prevProps.donationAddress != this.props.donationAddress ||
+    if(prevProps.address != this.props.address ||
        prevState.amount != this.state.amount) {
       this.setUrl()
     }
   }
   setUrl() {
-    createEthQRCodeDataUrl(this.props.donationAddress, this.state.amount,
+    createEthQRCodeDataUrl(this.props.address, this.state.amount,
       (err, url) => this.setState({url}))
   }
   render() {
@@ -45,7 +45,7 @@ class DonationModal extends React.Component {
               <div className='media-content'>
                 <p className='content'>
                   <p><strong>Donate</strong></p>
-                  {this.props.donationAddress}
+                  {this.props.address}
                 </p>
               </div>
             </article>
@@ -58,4 +58,4 @@ class DonationModal extends React.Component {
   }
 }
 
-export default DonationModal
+export default AddressModal

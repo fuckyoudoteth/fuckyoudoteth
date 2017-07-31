@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { Route, withRouter } from 'react-router-dom'
+import { CSSTransition, TransitionGroup } from 'react-transition-group'
+
 
 class ScrollToTopRoute extends Component {
   componentDidUpdate(prevProps) {
@@ -9,10 +11,8 @@ class ScrollToTopRoute extends Component {
     }
 
   }
-
   render() {
-    const { component: Component, ...rest } = this.props;
-    return <Route {...rest} render={props => (<Component {...props} />)} />
+    return <Route {...this.props} />
   }
 }
 

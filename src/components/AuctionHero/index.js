@@ -7,35 +7,35 @@ import { getAuctionBid, getWinningLoading } from '../../selectors'
 
 import Nav from '../Nav'
 import Identicon from '../Identicon'
-import DonationModal from '../DonationModal'
+import AddressModal from '../AddressModal'
 
-class DonationItem extends React.Component {
+class AddressItem extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      donationOpen: false,
+      modalOpen: false,
     }
   }
-  openDonationModal() {
-    this.setState({donationOpen: true})
+  openModal() {
+    this.setState({modalOpen: true})
   }
-  closeDonationModal(evt) {
-    this.setState({donationOpen: false})
+  closeModal(evt) {
+    this.setState({modalOpen: false})
     evt.stopPropagation()
   }
   render() {
     return (
       <div className='level-item is-link'
-           onClick={() => this.openDonationModal()}>
+           onClick={() => this.openModal()}>
         <div className='has-text-centered'>
-          <div className='heading'>Donate to</div>
+          <div className='heading'>{this.props.heading}</div>
           <div className='title'>
-            <Identicon centered address={this.props.donationAddress} />
+            <Identicon centered address={this.props.address} />
           </div>
         </div>
-        <DonationModal {...this.props}
-                       open={this.state.donationOpen}
-                       closeModal={(evt) => this.closeDonationModal(evt)} />
+        <AddressModal {...this.props}
+                      open={this.state.modalOpen}
+                      closeModal={(evt) => this.closeModal(evt)} />
       </div>
     )
   }
@@ -57,9 +57,14 @@ const AuctionFooter = props => {
             <div className='subtitle'>{props.amount} ETH</div>
           </div>
         </div>
+        <AddressItem
+          heading='Author'
+          address={props.bidder} />
         {
           props.donationAddress != '0x0000000000000000000000000000000000000000' ?
-            <DonationItem {...props} />: null
+            <AddressItem
+              heading='Donate to'
+              address={props.donationAddress} />: null
         }
       </nav>
       <nav className='level' />
@@ -68,8 +73,13 @@ const AuctionFooter = props => {
 }
 
 const Auction = props => {
+  const defaultMessage = (
+    <div className='title is-2'>
+      Front Page Fuck You of the Internet
+    </div>
+  )
   return (
-    <div className='hero is-fullheight is-dark is-bold'>
+    <div className='auction-hero hero is-fullheight is-dark is-bold'>
       <div className='hero-head'>
         <div className='container'>
           <Nav />
@@ -77,26 +87,20 @@ const Auction = props => {
       </div>
       <div className='hero-body'>
         <div className='container'>
-          <div className='columns'>
-            <div className='column is-5'>
-            </div>
-            <div className='column is-6 is-offset-1'>
+          <div className='level'>
+            <div className='level-item center'>
               <CSSTransition in={!props.loading}
                              timeout={200}
                              classNames='fade-in'>
                 <div>
-                  <div className='title is-4'>Front Page Fuck You of the Internet</div>
                   {
                     props.loading ?
-                    <div /> :
+                    defaultMessage :
                     props.amount && props.amount != '0' ?
                       <div className='content'>
-                        <div className='title is-spaced'>{props.message}</div>
-                        <div className='subtitle'>
-                          -<span> {props.bidder}</span>
-                        </div>
+                        <div className='title is-spaced is-xl'>{props.message}</div>
                       </div> :
-                      <div className='title is-spaced'>No Bids</div>
+                      defaultMessage
                   }
                 </div>
               </CSSTransition>

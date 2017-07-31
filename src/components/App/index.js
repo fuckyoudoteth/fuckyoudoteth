@@ -32,8 +32,10 @@ const LandingApp = props => {
 const App = props => {
   return (
     <div id='wrapper'>
-      <div className='container'>
-        <Nav />
+      <div className='hero is-dark'>
+        <div className='container'>
+          <Nav />
+        </div>
       </div>
       <section id='inner-wrapper' className='section'>
         <div className='container'>
