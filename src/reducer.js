@@ -94,17 +94,18 @@ export default function reducer(state=initialState, action) {
       pendingWithdrawals: action.pendingWithdrawals,
     }
   case END_AUCTION:
+    const nextAuctionNumber = action.auctionNumber + 1
     return {
       ...state,
       currentAuctionStatus: {
         ...state.currentAuctionStatus,
-        number: action.auctionNumber + 1,
+        number: nextAuctionNumber,
         ended: false,
       },
       auctions: {
         ...state.auctions,
-        [action.actionNumber + 1]: newAuction(
-          action.auctionNumber + 1,
+        [nextAuctionNumber]: newAuction(
+          nextAuctionNumber,
           new Date(Number(action.auctionEndTime) + (state.biddingTime * 1000)),
           newBid()),
         [action.auctionNumber]: newAuction(

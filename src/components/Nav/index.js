@@ -8,11 +8,15 @@ const Nav = props => {
   const navClass='nav-item'
   const navActiveClass='is-active'
   const navHomeActiveClass='is-home'
+
   return (
     <nav className='nav'>
       <div className='nav-left'>
       <div className='nav-item'>
-        <img src={logoSrc} alt='FuckYou.Eth Logo' />
+        <Link className={navClass}
+              to='/'>
+          <img src={logoSrc} alt='FuckYouDotEth Logo' />
+        </Link>
       </div>
       <div className='nav-item'>
 

@@ -88,7 +88,7 @@ const Auction = props => {
       <div className='hero-body'>
         <div className='container'>
           <div className='level'>
-            <div className='level-item center'>
+            <div className='center'>
               <CSSTransition in={!props.loading}
                              timeout={200}
                              classNames='fade-in'>
@@ -97,7 +97,7 @@ const Auction = props => {
                     props.loading ?
                     defaultMessage :
                     props.amount && props.amount != '0' ?
-                      <div className='content'>
+                      <div>
                         <div className='title is-spaced is-xl'>{props.message}</div>
                       </div> :
                       defaultMessage

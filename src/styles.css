@@ -62,6 +62,10 @@ body, #app {
   font-size: 28px;
   z-index: 10;
 }
+.highest-bid-card .button.is-loading {
+  border: 0px;
+  font-size: 6rem;
+}
 
 .fade-in-enter {
   opacity: 0.01;
@@ -72,8 +76,27 @@ body, #app {
   transition: opacity 500ms ease-in;
 }
 
+.current-bid-enter {
+  opacity: 0.01;
+  max-height: 0;
+}
+
+.current-bid-enter.current-bid-enter-active {
+  opacity: 1;
+  max-height: 500px;
+  transition: max-height 1000ms ease-in, opacity 800ms ease-in;
+}
+
+.fade-in-exit-active {
+  display: none;
+}
+
 .wipe-in-enter {
   opacity: 0.01;
+}
+
+.wipe-in-exit-active {
+  display: none;
 }
 
 .wipe-in-enter.wipe-in-enter-active {
@@ -116,7 +139,10 @@ body, #app {
   background-image: url('../images/dolphin.png');
   background-position: center;
 }
-
+.highest-bid-card {
+  margin-bottom: 1rem;
+  min-height: 264px;
+}
 .bid-tabs {
   margin-top: -3rem;
 }

@@ -106,8 +106,8 @@ the ICO.
 | Maximum ETH                               | 10 000 ETH          |
 | % of tokens for crowdfunding participants | 80%                 |
 | % of tokens for FUC team                  | 20%                 |
-| Approximate date of start                 | 01-07-2017, 1pm GMT |
-| Approximate date of end                   | 01-08-2017, 1pm GMT |
+| Approximate date of start                 | 08-21-2017, 1pm GMT |
+| Approximate date of end                   | 09-20-2017, 1pm GMT |
 | Maximum number of FUC created             | 14 400 000 FUC      |
 | - for crowdfunding participants           | 12 000 000 FUC      |
 | - for FUC team                            |  2 200 000 FUC      |

@@ -46,6 +46,14 @@ export const getPendingBid = state => state.site.pendingBid
 export const getPendingReset = state => state.site.pendingReset
 export const getPendingWithdrawals = state => state.site.pendingWithdrawals
 
+export const hasWithdrawals = createSelector(
+  [getWithdrawals],
+  withdrawals => {
+    const keys = Object.keys(withdrawals)
+    return keys.length > 0 && !keys.every(addr => !withdrawals[addr])
+  },
+)
+
 export const getCurrentLoading = createSelector(
   [getAuctions, getAuctionNumber],
   (auctions, number) => !auctions[number],
