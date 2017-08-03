@@ -6,15 +6,19 @@ import baskSrc from '../../../images/bask.png'
 
 const StepsSection = props => {
   return (
-    <div className='steps-section section is-large'>
+    <div className='steps-section section is-medium'>
       <div className='columns has-text-centered'>
         <div className='column is-4'>
           <div className='level'>
-          <div className='level-item'>
-          <figure className='image is-128x128'>
-            <img height='128px' src={craftSrc} />
-          </figure>
-          </div>
+            <div className='level-item'>
+              <div className='circle circle-1'>
+                <div className='inner'>
+                  <figure className='image is-128x128'>
+                    <img height='128px' src={craftSrc} />
+                  </figure>
+                </div>
+              </div>
+            </div>
           </div>
           <div className='heading'>
             Craft Your Message
@@ -22,11 +26,15 @@ const StepsSection = props => {
         </div>
         <div className='column is-4'>
           <div className='level'>
-          <div className='level-item'>
-          <figure className='image is-128x128'>
-            <img height='128px' src={placeSrc} />
-          </figure>
-          </div>
+            <div className='level-item'>
+              <div className='circle circle-2'>
+                <div className='inner'>
+                  <figure className='image is-128x128'>
+                    <img height='128px' src={placeSrc} />
+                  </figure>
+                </div>
+              </div>
+            </div>
           </div>
           <div className='heading'>
             Place Your Bid
@@ -34,11 +42,15 @@ const StepsSection = props => {
         </div>
         <div className='column is-4'>
           <div className='level'>
-          <div className='level-item'>
-          <figure className='image is-128x128'>
-            <img height='128px' src={baskSrc} />
-          </figure>
-          </div>
+            <div className='level-item'>
+              <div className='circle circle-3'>
+                <div className='inner'>
+                  <figure className='image is-128x128'>
+                    <img height='128px' src={baskSrc} />
+                  </figure>
+                </div>
+              </div>
+            </div>
           </div>
           <div className='heading'>
             Soak Up Your Victory

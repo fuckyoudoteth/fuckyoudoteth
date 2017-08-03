@@ -109,6 +109,9 @@ body, #app {
 .steps-section {
   background: inherit;
 }
+.steps-section .heading {
+  font-size: 1.1em;
+}
 .whitepaper-section {
   background: rgb(225, 225, 251);
 }
@@ -145,4 +148,26 @@ body, #app {
 }
 .bid-tabs {
   margin-top: -3rem;
+}
+
+.circle {
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+}
+.circle > .inner {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+.circle.circle-1 {
+  background-color: rgba(200,50,50,0.3);
+}
+.circle.circle-2 {
+  background-color: rgba(200,200,50,0.3);
+}
+.circle.circle-3 {
+  background-color: rgba(50,200,50,0.3);
 }
